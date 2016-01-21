@@ -1,0 +1,9 @@
+{
+  "presets": ["es2015-loose"],
+  "plugins": [
+    "add-module-exports",
+    "transform-class-properties",
+    "transform-object-rest-spread",
+    "transform-export-extensions"
+  ]
+}
