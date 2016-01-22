@@ -1,10 +1,20 @@
 import {expect} from 'chai'
 import {fromJS} from 'immutable'
-import reducer, {start} from 'state/compiler'
+import reducer, {finish, start} from 'state/compiler'
 
 describe('state/compiler', () => {
 
   describe('reducer', () => {
+
+    it('handles FINISH events by setting inProgress to false', () => {
+      const action = finish()
+      const initialState = fromJS({inProgress: true})
+      const expected = fromJS({inProgress: false})
+
+      const result = reducer(initialState, action)
+
+      expect(result).to.equal(expected)
+    })
 
     it('handles START events by setting inProgress to true', () => {
       const action = start()
