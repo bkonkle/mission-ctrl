@@ -2,6 +2,7 @@ import findup from 'findup-sync'
 import minimist from 'minimist'
 
 const DEFAULTS = {
+  outDir: 'build',
   source: 'src/**/*.js?(x)',
 }
 

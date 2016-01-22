@@ -1,19 +1,19 @@
 import {getStore} from 'state/store'
 import {values} from 'ramda'
-import compiler from 'workers/compiler'
 import createLogger from 'utils/logging'
 import Threads from 'webworker-threads'
+import transpiler from 'workers/transpiler'
 
 const log = createLogger('foreman')
 
-export function init(store) {
-  const {dispatch} = store || getStore()
+export function init(storeOverride) {
+  const store = storeOverride || getStore()
 
   const workers = {
-    compiler: new Threads.Worker(compiler),
+    transpiler: new Threads.Worker(transpiler(store)),
   }
 
-  const dispatchAction = action => dispatch(action)
+  const dispatchAction = action => store.dispatch(action)
   values(workers).forEach(worker => {
     worker.onmessage = dispatchAction
   })

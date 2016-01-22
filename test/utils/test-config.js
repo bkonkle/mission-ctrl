@@ -18,6 +18,7 @@ describe('utils/config', () => {
 
     const expected = {
       _: [],
+      outDir: 'build',
       quiet: false,
       silent: false,
       source: 'src/**/*.js?(x)',

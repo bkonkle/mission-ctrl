@@ -3,12 +3,6 @@
   "version": "1.0.0",
   "description": "A build and execution environment for React/Redux apps",
   "main": "lib/index.js",
-  "scripts": {
-    "build": "NODE_PATH=$NODE_PATH:src NODE_ENV=development babel src -s -d lib",
-    "test": "NODE_PATH=$NODE_PATH:src NODE_ENV=test istanbul test _mocha -- --require test/setup test/**/*.js",
-    "watch": "npm run build -- -w",
-    "test-watch": "npm run test -- -w"
-  },
   "repository": {
     "type": "git",
     "url": "git@github.com:ecliptic/ship-yard.git"
@@ -23,17 +17,21 @@
     "universal"
   ],
   "dependencies": {
-    "babel-core": "^6.4.5",
     "babel-cli": "^6.4.5",
+    "babel-core": "^6.4.5",
     "bunyan": "^1.5.1",
     "chalk": "^1.1.1",
     "findup-sync": "^0.3.0",
+    "fs-readdir-recursive": "^1.0.0",
     "glob": "^6.0.4",
     "immutable": "^3.7.6",
     "minimist": "^1.2.0",
+    "output-file-sync": "^1.1.1",
+    "path-exists": "^2.1.0",
     "ramda": "^0.19.1",
     "rc": "^1.1.6",
     "redux-thunk": "^1.0.3",
+    "slash": "^1.0.0",
     "webworker-threads": "^0.6.2"
   },
   "devDependencies": {

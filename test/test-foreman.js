@@ -18,7 +18,7 @@ describe('foreman', () => {
 
   describe('init()', () => {
 
-    it('spawns a compiler worker', () => {
+    it('spawns a transpiler worker', () => {
       init()
       expect(threadStub.Worker).to.have.been.called
     })
@@ -26,11 +26,11 @@ describe('foreman', () => {
     it('messages from the workers dispatch actions', done => {
       const worker = {}
       threadStub.Worker.returns(worker)
-      const store = mockStore({}, [ready('compiler')], done)
+      const store = mockStore({}, [ready('transpiler')], done)
 
       init(store)
 
-      worker.onmessage(ready('compiler'))
+      worker.onmessage(ready('transpiler'))
     })
 
   })

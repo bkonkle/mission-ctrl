@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+babel=./node_modules/.bin/babel
+
+NODE_PATH="$NODE_PATH:src" \
+  NODE_ENV=development \
+  $babel src -s -d lib "$@"
