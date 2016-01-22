@@ -7,7 +7,7 @@ describe('utils/logging', () => {
   const createLoggerSpy = sinon.spy()
   const getConfigStub = sinon.stub()
 
-  const logging = proxyquire('../../src/utils/logging', {
+  const logging = proxyquire('utils/logging', {
     './config': getConfigStub,
     'bunyan': {createLogger: createLoggerSpy},
   })

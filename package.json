@@ -4,8 +4,8 @@
   "description": "A build and execution environment for React/Redux apps",
   "main": "lib/index.js",
   "scripts": {
-    "build": "babel src -s -d lib",
-    "test": "istanbul test _mocha -- --require test/setup test/**/*.js",
+    "build": "NODE_PATH=$NODE_PATH:src NODE_ENV=development babel src -s -d lib",
+    "test": "NODE_PATH=$NODE_PATH:src NODE_ENV=test istanbul test _mocha -- --require test/setup test/**/*.js",
     "watch": "npm run build -- -w",
     "test-watch": "npm run test -- -w"
   },
@@ -23,11 +23,15 @@
     "universal"
   ],
   "dependencies": {
+    "babel": "^6.3.26",
     "bunyan": "^1.5.1",
     "chalk": "^1.1.1",
     "findup-sync": "^0.3.0",
+    "immutable": "^3.7.6",
     "minimist": "^1.2.0",
+    "ramda": "^0.19.1",
     "rc": "^1.1.6",
+    "redux-thunk": "^1.0.3",
     "webworker-threads": "^0.6.2"
   },
   "devDependencies": {
@@ -41,6 +45,7 @@
     "babel-preset-es2015-loose": "^7.0.0",
     "babel-register": "^6.4.3",
     "chai": "^3.4.1",
+    "chai-immutable": "^1.5.3",
     "eslint": "^1.9.0",
     "eslint-config-ecliptic": "^1.3.0",
     "istanbul": "^0.4.1",
@@ -48,6 +53,7 @@
     "proxyquire": "^1.7.3",
     "redux": "^3.0.5",
     "redux-actions": "^0.9.1",
+    "redux-mock-store": "0.0.6",
     "sinon": "^1.17.2",
     "sinon-chai": "^2.8.0",
     "webpack": "^1.12.9"
