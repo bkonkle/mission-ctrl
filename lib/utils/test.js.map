@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../src/utils/test.js"],"names":[],"mappings":";;;QAGgB;;;;;;;;;;;;AAAT,SAAS,SAAT,GAA4B;AACjC,SAAO,8BAAe,sBAAf,6BAAP,CADiC;CAA5B","file":"test.js","sourcesContent":["import configureStore from 'redux-mock-store'\nimport thunkMiddleware from 'redux-thunk'\n\nexport function mockStore(...args) {\n  return configureStore([thunkMiddleware])(...args)\n}\n"]}
