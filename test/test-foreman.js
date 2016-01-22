@@ -10,6 +10,10 @@ describe('foreman', () => {
     'webworker-threads': threadStub,
   })
 
+  afterEach(() => {
+    threadStub.Worker.reset()
+  })
+
   describe('init()', () => {
 
     it('spawns a compiler worker', () => {

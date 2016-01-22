@@ -3,17 +3,6 @@ import bunyan from 'bunyan'
 import chalk from 'chalk'
 import getConfig from './config'
 
-const config = getConfig()
-
-let loglevel = 'info'
-if (config.verbose) {
-  loglevel = 'debug'
-} else if (config.quiet) {
-  loglevel = 'warning'
-} else if (config.silent) {
-  loglevel = 'error'
-}
-
 export class PlainStream {
   write(rec) {
     let record = rec.msg
@@ -42,6 +31,17 @@ export class PlainStream {
  * @return {Object} - the bunyan logger object
  */
 export default function createLogger(name, level) {
+  const config = getConfig()
+
+  let loglevel = 'info'
+  if (config.verbose) {
+    loglevel = 'debug'
+  } else if (config.quiet) {
+    loglevel = 'warning'
+  } else if (config.silent) {
+    loglevel = 'error'
+  }
+
   const settings = {
     name,
     streams: [
