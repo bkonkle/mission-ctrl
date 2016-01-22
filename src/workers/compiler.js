@@ -1,6 +1,6 @@
 import {getConfig} from 'utils/config'
 import {ready} from 'state/workers'
-import babel from 'babel'
+import babel from 'babel-core'
 import createLogger from 'utils/logging'
 import {sync as glob} from 'glob'
 

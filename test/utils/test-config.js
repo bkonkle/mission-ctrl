@@ -20,6 +20,7 @@ describe('utils/config', () => {
       _: [],
       quiet: false,
       silent: false,
+      source: 'src/**/*.js?(x)',
       v: true,
       verbose: true,
     }
