@@ -55,6 +55,7 @@
     "redux-mock-store": "0.0.6",
     "sinon": "^1.17.2",
     "sinon-chai": "^2.8.0",
+    "source-map-support": "^0.4.0",
     "webpack": "^1.12.9"
   }
 }
