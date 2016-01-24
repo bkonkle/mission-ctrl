@@ -4,20 +4,32 @@ import chalk from 'chalk'
 import getConfig from './config'
 
 export class PlainStream {
+  constructor(level) {
+    this.level = level
+  }
+
   write(rec) {
-    let record = rec.msg
+    const prefix = message => {
+      if (this.level < bunyan.INFO) {
+        return `[${chalk.blue(rec.name)}] ${message}`
+      }
+      return message
+    }
 
     if (rec.level < bunyan.INFO) {
-      console.log(record)
+      console.log(prefix(rec.msg))
     } else if (rec.level < bunyan.WARN) {
-      console.info(record)
+      console.info(prefix(rec.msg))
     } else if (rec.level < bunyan.ERROR) {
-      console.warn(record)
-    } else {
-      if (typeof record === 'string') {
-        record = chalk.red(record)
+      if (typeof rec.msg === 'string') {
+        rec.msg = chalk.yellow(rec.msg)
       }
-      console.error(record)
+      console.warn(prefix(rec.msg))
+    } else {
+      if (typeof rec.msg === 'string') {
+        rec.msg = chalk.red(rec.msg)
+      }
+      console.error(prefix(rec.msg))
     }
   }
 }
@@ -33,13 +45,13 @@ export class PlainStream {
 export default function createLogger(name, level) {
   const config = getConfig()
 
-  let loglevel = 'info'
+  let loglevel = bunyan.INFO
   if (config.verbose) {
-    loglevel = 'debug'
+    loglevel = bunyan.DEBUG
   } else if (config.quiet) {
-    loglevel = 'warning'
+    loglevel = bunyan.WARN
   } else if (config.silent) {
-    loglevel = 'error'
+    loglevel = bunyan.ERROR
   }
 
   const settings = {
@@ -48,7 +60,7 @@ export default function createLogger(name, level) {
       {
         level: level || loglevel,
         type: 'raw',
-        stream: new PlainStream(),
+        stream: new PlainStream(level || loglevel),
       },
     ],
   }

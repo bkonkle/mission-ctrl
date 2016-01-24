@@ -1,4 +1,5 @@
 import {expect} from 'chai'
+import bunyan from 'bunyan'
 import proxyquire from 'proxyquire'
 import sinon from 'sinon'
 
@@ -7,7 +8,7 @@ describe('utils/logging', () => {
   const createLoggerSpy = sinon.spy()
   const getConfigStub = sinon.stub()
 
-  const logging = proxyquire('utils/logging', {
+  const logging = proxyquire('./logging', {
     './config': getConfigStub,
     'bunyan': {createLogger: createLoggerSpy},
   })
@@ -30,7 +31,7 @@ describe('utils/logging', () => {
       const result = createLoggerSpy.firstCall.args[0]
 
       expect(result).to.have.property('streams').and.have.length(1)
-      expect(result.streams[0]).to.have.property('level', 'info')
+      expect(result.streams[0]).to.have.property('level', bunyan.INFO)
     })
 
     it('sets the loglevel to "debug" if config.verbose', () => {
@@ -42,7 +43,7 @@ describe('utils/logging', () => {
       const result = createLoggerSpy.firstCall.args[0]
 
       expect(result).to.have.property('streams').and.have.length(1)
-      expect(result.streams[0]).to.have.property('level', 'debug')
+      expect(result.streams[0]).to.have.property('level', bunyan.DEBUG)
     })
 
     it('sets the loglevel to "warning" if config.quiet', () => {
@@ -54,7 +55,7 @@ describe('utils/logging', () => {
       const result = createLoggerSpy.firstCall.args[0]
 
       expect(result).to.have.property('streams').and.have.length(1)
-      expect(result.streams[0]).to.have.property('level', 'warning')
+      expect(result.streams[0]).to.have.property('level', bunyan.WARN)
     })
 
     it('sets the loglevel to "error" if config.silent', () => {
@@ -66,7 +67,7 @@ describe('utils/logging', () => {
       const result = createLoggerSpy.firstCall.args[0]
 
       expect(result).to.have.property('streams').and.have.length(1)
-      expect(result.streams[0]).to.have.property('level', 'error')
+      expect(result.streams[0]).to.have.property('level', bunyan.ERROR)
     })
 
     it('uses the PlainStream by default', () => {

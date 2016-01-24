@@ -1,6 +1,6 @@
 import {expect} from 'chai'
 import {fromJS} from 'immutable'
-import reducer, {finish, start} from 'state/transpiler'
+import reducer, {finish, start} from './transpiler'
 
 describe('state/transpiler', () => {
 

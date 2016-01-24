@@ -4,6 +4,7 @@ import minimist from 'minimist'
 const DEFAULTS = {
   outDir: 'build',
   source: 'src/**/*.js?(x)',
+  production: false,
 }
 
 export default function getConfig(argv) {

@@ -6,7 +6,7 @@ describe('utils/config', () => {
 
   const findupStub = sinon.stub()
 
-  const getConfig = proxyquire('utils/config', {
+  const getConfig = proxyquire('./config', {
     'findup-sync': findupStub,
   })
 
@@ -19,6 +19,7 @@ describe('utils/config', () => {
     const expected = {
       _: [],
       outDir: 'build',
+      production: false,
       quiet: false,
       silent: false,
       source: 'src/**/*.js?(x)',

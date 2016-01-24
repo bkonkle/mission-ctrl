@@ -1,0 +1,9 @@
+#!/usr/bin/env node
+/* eslint-disable no-var */
+var path = require('path')
+
+require('app-module-path').addPath(
+  path.resolve(path.join(__dirname, '..', 'lib'))
+)
+
+require('foreman').init()

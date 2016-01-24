@@ -17,6 +17,7 @@
     "universal"
   ],
   "dependencies": {
+    "app-module-path": "^1.0.5",
     "babel-cli": "^6.4.5",
     "babel-core": "^6.4.5",
     "bunyan": "^1.5.1",
@@ -31,8 +32,7 @@
     "ramda": "^0.19.1",
     "rc": "^1.1.6",
     "redux-thunk": "^1.0.3",
-    "slash": "^1.0.0",
-    "webworker-threads": "^0.6.2"
+    "slash": "^1.0.0"
   },
   "devDependencies": {
     "babel-eslint": "^4.1.5",

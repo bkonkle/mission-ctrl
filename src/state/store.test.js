@@ -1,5 +1,5 @@
 import {expect} from 'chai'
-import {getStore} from 'state/store'
+import {getStore} from './store'
 
 describe('state/store', () => {
 

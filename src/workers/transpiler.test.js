@@ -9,12 +9,14 @@ describe('workers/transpiler', () => {
 
   const transpileSpy = sinon.spy()
 
-  const transpiler = proxyquire('workers/transpiler', {
+  const transpiler = proxyquire('./transpiler', {
     'utils/babel': {transpileToDir: transpileSpy},
   })
 
   afterEach(() => {
     transpileSpy.reset()
+    process.on.reset()
+    process.send.reset()
   })
 
   describe('transpile()', () => {
@@ -22,12 +24,11 @@ describe('workers/transpiler', () => {
     it('reports status to the worker and updates internal status', done => {
       const expectedActions = [start(), finish()]
       const store = mockStore({}, expectedActions, done)
-      const worker = {postMessage: sinon.spy()}
 
-      transpiler.transpile(store, worker)
+      transpiler.transpile(store)
 
-      expect(worker.postMessage).to.have.been.calledWith(busy(WORKER_TRANSPILER))
-      expect(worker.postMessage).to.have.been.calledWith(ready(WORKER_TRANSPILER))
+      expect(process.send).to.have.been.calledWith(busy(WORKER_TRANSPILER))
+      expect(process.send).to.have.been.calledWith(ready(WORKER_TRANSPILER))
     })
 
   })

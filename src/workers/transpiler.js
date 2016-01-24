@@ -1,4 +1,5 @@
 import {finish, start} from 'state/transpiler'
+import {getStore} from 'state/store'
 import {ready, busy, WORKER_TRANSPILER} from 'state/workers'
 import {sync as glob} from 'glob'
 import {transpileToDir} from 'utils/babel'
@@ -7,11 +8,33 @@ import getConfig from 'utils/config'
 
 const log = createLogger('workers/transpiler')
 
-export function transpile(store, worker) {
+function init() {
+  log.debug('Transpiler initializing')
+
+  const store = getStore()
+
+  store.subscribe(() => handleStateChange.bind(null, store))
+
+  process.on('message', message => {
+    log.debug('Message received!', message)
+    store.dispatch(message)
+  })
+
+  process.send(ready(WORKER_TRANSPILER))
+
+  log.debug('Transpiler successfully initialized')
+}
+
+export function handleStateChange(store) {
+  const state = store.getState()
+  log.debug('State changed', state)
+}
+
+export function transpile(store) {
   const config = getConfig()
   const filenames = glob(config.source)
 
-  worker.postMessage(busy(WORKER_TRANSPILER))
+  process.send(busy(WORKER_TRANSPILER))
   store.dispatch(start())
 
   transpileToDir({
@@ -20,22 +43,7 @@ export function transpile(store, worker) {
   }, filenames)
 
   store.dispatch(finish())
-  worker.postMessage(ready(WORKER_TRANSPILER))
+  process.send(ready(WORKER_TRANSPILER))
 }
 
-export function handleStateChange(store) {
-  const state = store.getState()
-  console.log('state change!', state)
-}
-
-export default store => () => {
-  store.subscribe(() => handleStateChange.bind(null, store))
-
-  this.onmessage = event => {
-    store.dispatch(event.data)
-  }
-
-  this.postMessage(ready(WORKER_TRANSPILER))
-
-  log.debug('Transpiler process ready.')
-}
+init()

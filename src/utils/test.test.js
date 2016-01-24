@@ -1,5 +1,5 @@
 import {expect} from 'chai'
-import {mockStore} from 'utils/test'
+import {mockStore} from './test'
 
 describe('utils/test', () => {
 
