@@ -59,7 +59,7 @@ describe('foreman', () => {
       foreman.init(store)
 
       expect(store.subscribe).to.have.been.calledOnce
-      expect(store.subscribe.firstCall.args[0]).to.have.property('name', 'bound handleStateChange')
+      expect(store.subscribe.firstCall.args[0]).to.have.property('name', 'bound stateChanged')
     })
 
     it('dispatches an initial GOAL_TRANSPILE', done => {
@@ -91,7 +91,7 @@ describe('foreman', () => {
 
   })
 
-  describe('handleStateChange()', () => {
+  describe('stateChanged()', () => {
 
     it('throws an error if there is no goal', () => {
       const sendSpy = sinon.spy()
@@ -99,7 +99,7 @@ describe('foreman', () => {
       const workers = {[WORKER_TRANSPILER]: {send: sendSpy}}
 
       expect(
-        () => foreman.handleStateChange(store, workers)
+        () => foreman.stateChanged(store, workers)
       ).to.throw(Error)
     })
 
@@ -111,7 +111,7 @@ describe('foreman', () => {
       })}
       const workers = {[WORKER_TRANSPILER]: {send: sendSpy}}
 
-      foreman.handleStateChange(store, workers)
+      foreman.stateChanged(store, workers)
 
       expect(sendSpy).to.be.calledWith(startTranspiler())
     })

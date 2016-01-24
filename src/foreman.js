@@ -17,10 +17,13 @@ export function init(storeOverride) {
   }
 
   values(workers).forEach(worker => {
-    worker.on('message', action => store.dispatch(action))
+    worker.on('message', message => {
+      log.debug('Message received:', message.type)
+      store.dispatch(message)
+    })
   })
 
-  store.subscribe(handleStateChange.bind(null, store, workers))
+  store.subscribe(stateChanged.bind(null, store, workers))
 
   log.debug('Successfully initialized')
 
@@ -39,7 +42,7 @@ export function forkWorker(worker) {
   })
 }
 
-export function handleStateChange(store, workers) {
+export function stateChanged(store, workers) {
   log.debug('State changed')
 
   const state = store.getState()
