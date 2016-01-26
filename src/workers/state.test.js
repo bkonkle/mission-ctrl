@@ -1,8 +1,8 @@
 import {expect} from 'chai'
 import {fromJS} from 'immutable'
-import reducer, {workerReady, OFFLINE, READY} from './workers'
+import reducer, {workerReady, OFFLINE, READY} from './state'
 
-describe('state/workers', () => {
+describe('workers/state', () => {
 
   describe('reducer()', () => {
 

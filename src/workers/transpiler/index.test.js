@@ -3,7 +3,7 @@ import {fromJS} from 'immutable'
 import {GOAL_TRANSPILE} from 'state/foreman'
 import {inProgress} from 'workers/transpiler/state'
 import {mockStore} from 'utils/test'
-import {workerBusy, workerReady, WORKER_TRANSPILER} from 'state/workers'
+import {workerBusy, workerReady, WORKER_TRANSPILER} from 'workers/state'
 import proxyquire from 'proxyquire'
 import sinon from 'sinon'
 

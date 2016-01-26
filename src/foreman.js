@@ -3,7 +3,7 @@ import {setGoal as setLinterGoal} from 'workers/linter/state'
 import {setGoal as setTranspilerGoal} from 'workers/transpiler/state'
 import {setGoal, GOAL_TRANSPILE, GOAL_LINT} from 'state/foreman'
 import {values} from 'ramda'
-import * as workers from 'state/workers'
+import * as workers from 'workers/state'
 import childProcess from 'child_process'
 import createLogger from 'utils/logging'
 import path from 'path'
@@ -33,7 +33,7 @@ export function init(storeOverride) {
 
 export function forkWorker(worker) {
   const workerPath = path.resolve(
-    path.join(__dirname, 'workers', `${worker}.js`)
+    path.join(__dirname, 'workers', `${worker}/index.js`)
   )
   return childProcess.fork(workerPath, [...process.argv.slice(2), '--color'], {
     env: {NODE_PATH: `${process.env.NODE_PATH}:${__dirname}`},

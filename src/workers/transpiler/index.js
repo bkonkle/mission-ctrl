@@ -1,29 +1,16 @@
-import {getStore} from 'state/store'
 import {GOAL_TRANSPILE} from 'state/foreman'
 import {inProgress} from 'workers/transpiler/state'
-import {workerReady, workerBusy, WORKER_TRANSPILER} from 'state/workers'
 import {sync as glob} from 'glob'
 import {transpileToDir} from 'utils/babel'
+import {workerInit} from 'workers/utils'
+import {workerReady, workerBusy, WORKER_TRANSPILER} from 'workers/state'
 import createLogger from 'utils/logging'
 import getConfig from 'utils/config'
 import path from 'path'
 
 const log = createLogger('workers/transpiler')
 
-export function init() {
-  const store = getStore()
-
-  store.subscribe(stateChanged.bind(null, store))
-
-  process.on('message', message => {
-    log.debug('Message received:', message.type)
-    store.dispatch(message)
-  })
-
-  process.send(workerReady(WORKER_TRANSPILER))
-
-  log.debug('Successfully initialized')
-}
+export const init = workerInit(WORKER_TRANSPILER, stateChanged)
 
 export function transpile(store) {
   log.debug('Beginning transpile')
@@ -62,5 +49,3 @@ export function stateChanged(store) {
       // Do nothing
   }
 }
-
-init()

@@ -4,7 +4,7 @@ import {mockStore} from 'utils/test'
 import {setGoal as setLinterGoal} from 'workers/linter/state'
 import {setGoal as setTranspilerGoal} from 'workers/transpiler/state'
 import {setGoal, GOAL_TRANSPILE, GOAL_LINT} from 'state/foreman'
-import * as workers from 'state/workers'
+import * as workers from 'workers/state'
 import path from 'path'
 import proxyquire from 'proxyquire'
 import sinon from 'sinon'
@@ -80,7 +80,7 @@ describe('foreman', () => {
       const worker = {}
       const workerName = 'whip-creamer'
       const workerPath = path.resolve(
-        path.join(__dirname, 'workers', `${workerName}.js`)
+        path.join(__dirname, 'workers', `${workerName}/index.js`)
       )
       forkStub.returns(worker)
 

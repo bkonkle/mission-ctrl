@@ -1,7 +1,7 @@
 import {CLIEngine} from 'eslint'
 import {GOAL_LINT} from 'state/foreman'
 import {inProgress} from 'workers/linter/state'
-import {workerReady, workerBusy, WORKER_LINTER} from 'state/workers'
+import {workerReady, workerBusy, WORKER_LINTER} from 'workers/state'
 import createLogger from 'utils/logging'
 import getConfig from 'utils/config'
 
