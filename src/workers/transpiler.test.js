@@ -1,17 +1,20 @@
-import {busy, ready, WORKER_TRANSPILER} from 'state/workers'
 import {expect} from 'chai'
 import {fromJS} from 'immutable'
+import {GOAL_TRANSPILE} from 'state/foreman'
+import {inProgress} from 'state/transpiler'
 import {mockStore} from 'utils/test'
-import {started, finish, STATUS_STARTING} from 'state/transpiler'
+import {workerBusy, workerReady, WORKER_TRANSPILER} from 'state/workers'
 import proxyquire from 'proxyquire'
 import sinon from 'sinon'
 
 describe('workers/transpiler', () => {
   const dispatchSpy = sinon.spy()
+  const globStub = sinon.stub().returns(['src/spike.js', 'src/lee.js'])
   const subscribeSpy = sinon.spy()
   const transpileSpy = sinon.spy()
 
   const transpiler = proxyquire('./transpiler', {
+    'glob': {sync: globStub},
     'state/store': {getStore: () => ({
       dispatch: dispatchSpy,
       subscribe: subscribeSpy,
@@ -21,6 +24,7 @@ describe('workers/transpiler', () => {
 
   afterEach(() => {
     dispatchSpy.reset()
+    globStub.reset()
     subscribeSpy.reset()
     transpileSpy.reset()
     process.on.reset()
@@ -49,7 +53,7 @@ describe('workers/transpiler', () => {
 
     it('sends a ready message back to the parent process', () => {
       transpiler.init()
-      expect(process.send).to.have.been.calledWith(ready(WORKER_TRANSPILER))
+      expect(process.send).to.have.been.calledWith(workerReady(WORKER_TRANSPILER))
     })
 
   })
@@ -57,38 +61,42 @@ describe('workers/transpiler', () => {
   describe('transpile()', () => {
 
     it('reports status to the worker and updates internal status', done => {
-      const expectedActions = [started(), finish()]
+      const expectedActions = [inProgress(true), inProgress(false)]
       const store = mockStore({}, expectedActions, done)
 
       transpiler.transpile(store)
 
-      expect(process.send).to.have.been.calledWith(busy(WORKER_TRANSPILER))
-      expect(process.send).to.have.been.calledWith(ready(WORKER_TRANSPILER))
+      expect(process.send).to.have.been.calledWith(workerBusy(WORKER_TRANSPILER))
+      expect(process.send).to.have.been.calledWith(workerReady(WORKER_TRANSPILER))
+    })
+
+    it('calls transpileToDir with the appropriate arguments', done => {
+      const expectedActions = [inProgress(true), inProgress(false)]
+      const store = mockStore({}, expectedActions, done)
+
+      transpiler.transpile(store)
+
+      expect(transpileSpy).to.have.been.calledWith({
+        baseDir: 'src',
+        filenames: ['src/spike.js', 'src/lee.js'],
+        outDir: 'build',
+        sourceMaps: true,
+      })
     })
 
   })
 
   describe('stateChanged()', () => {
 
-    describe('STATUS_STARTING', () => {
+    describe('GOAL_TRANSPILE', () => {
 
       it('runs a transpile', () => {
         const store = {
           dispatch: () => {},
           getState: () => ({
-            transpiler: fromJS({status: STATUS_STARTING}),
+            transpiler: fromJS({goal: GOAL_TRANSPILE, inProgress: false}),
           }),
         }
-
-        transpiler.stateChanged(store)
-
-        expect(transpileSpy).to.have.been.calledOnce
-      })
-
-      it('dispatches a STARTED event', done => {
-        const initialState = {transpiler: fromJS({status: STATUS_STARTING})}
-        const expectedActions = [started(), finish()]
-        const store = mockStore(initialState, expectedActions, done)
 
         transpiler.stateChanged(store)
 

@@ -2,9 +2,10 @@ import findup from 'findup-sync'
 import minimist from 'minimist'
 
 const DEFAULTS = {
-  outDir: 'build',
-  source: 'src/**/*.js?(x)',
+  dest: 'build',
+  glob: '**/*.js?(x)',
   production: false,
+  source: 'src',
 }
 
 export default function getConfig(argv) {

@@ -1,8 +1,8 @@
 import {createAction, handleActions} from 'redux-actions'
 import {fromJS} from 'immutable'
 
-export const IN_PROGRESS = 'ship-yard/transpiler/IN_PROGRESS'
-export const SET_GOAL = 'ship-yard/transpiler/SET_GOAL'
+export const IN_PROGRESS = 'ship-yard/linter/IN_PROGRESS'
+export const SET_GOAL = 'ship-yard/linter/SET_GOAL'
 
 const initialState = fromJS({
   goal: null,

@@ -1,9 +1,10 @@
 import {expect} from 'chai'
 import {fromJS} from 'immutable'
 import {mockStore} from 'utils/test'
-import {ready, STATUS_READY, WORKER_TRANSPILER} from 'state/workers'
-import {setGoal, GOAL_TRANSPILE} from 'state/foreman'
-import {start as startTranspiler} from 'state/transpiler'
+import {setGoal as setLinterGoal} from 'state/linter'
+import {setGoal as setTranspilerGoal} from 'state/transpiler'
+import {setGoal, GOAL_TRANSPILE, GOAL_LINT} from 'state/foreman'
+import * as workers from 'state/workers'
 import path from 'path'
 import proxyquire from 'proxyquire'
 import sinon from 'sinon'
@@ -40,13 +41,13 @@ describe('foreman', () => {
     it('dispatches actions from worker messages', done => {
       const store = mockStore({}, [
         setGoal(GOAL_TRANSPILE),
-        ready('transpiler'),
+        workers.workerReady('transpiler'),
       ], done)
       store.subscribe = () => {}
 
       foreman.init(store)
 
-      callback(ready('transpiler'))
+      callback(workers.workerReady('transpiler'))
     })
 
     it('subscribes to state changes', done => {
@@ -96,10 +97,10 @@ describe('foreman', () => {
     it('throws an error if there is no goal', () => {
       const sendSpy = sinon.spy()
       const store = {getState: () => ({foreman: fromJS({goal: null})})}
-      const workers = {[WORKER_TRANSPILER]: {send: sendSpy}}
+      const processes = {[workers.WORKER_TRANSPILER]: {send: sendSpy}}
 
       expect(
-        () => foreman.stateChanged(store, workers)
+        () => foreman.stateChanged(store, processes)
       ).to.throw(Error)
     })
 
@@ -107,13 +108,26 @@ describe('foreman', () => {
       const sendSpy = sinon.spy()
       const store = {getState: () => ({
         foreman: fromJS({goal: GOAL_TRANSPILE}),
-        workers: fromJS({[WORKER_TRANSPILER]: {status: STATUS_READY}}),
+        workers: fromJS({[workers.WORKER_TRANSPILER]: {status: workers.READY}}),
       })}
-      const workers = {[WORKER_TRANSPILER]: {send: sendSpy}}
+      const processes = {[workers.WORKER_TRANSPILER]: {send: sendSpy}}
 
-      foreman.stateChanged(store, workers)
+      foreman.stateChanged(store, processes)
 
-      expect(sendSpy).to.be.calledWith(startTranspiler())
+      expect(sendSpy).to.be.calledWith(setTranspilerGoal(GOAL_TRANSPILE))
+    })
+
+    it('starts linting if transpilation is done', () => {
+      const sendSpy = sinon.spy()
+      const store = {getState: () => ({
+        foreman: fromJS({goal: GOAL_LINT}),
+        workers: fromJS({[workers.WORKER_LINTER]: {status: workers.READY}}),
+      })}
+      const processes = {[workers.WORKER_LINTER]: {send: sendSpy}}
+
+      foreman.stateChanged(store, processes)
+
+      expect(sendSpy).to.be.calledWith(setLinterGoal(GOAL_LINT))
     })
 
   })

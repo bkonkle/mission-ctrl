@@ -1,19 +1,23 @@
 import {expect} from 'chai'
 import {fromJS} from 'immutable'
-import reducer, {ready, STATUS_OFFLINE, STATUS_READY} from './workers'
+import reducer, {workerReady, OFFLINE, READY} from './workers'
 
 describe('state/workers', () => {
 
   describe('reducer()', () => {
 
-    it('handles READY events', () => {
-      const action = ready('transpiler')
-      const initialState = fromJS({transpiler: {status: STATUS_OFFLINE}})
-      const expected = fromJS({transpiler: {status: STATUS_READY, error: null}})
+    describe('READY', () => {
 
-      const result = reducer(initialState, action)
+      it('sets the status to READY', () => {
+        const action = workerReady('transpiler')
+        const initialState = fromJS({transpiler: {status: OFFLINE}})
+        const expected = fromJS({transpiler: {status: READY, error: null}})
 
-      expect(result).to.equal(expected)
+        const result = reducer(initialState, action)
+
+        expect(result).to.equal(expected)
+      })
+
     })
 
   })

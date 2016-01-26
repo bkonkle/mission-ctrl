@@ -1,53 +1,63 @@
 import {getStore} from 'state/store'
-import {ready, busy, WORKER_TRANSPILER} from 'state/workers'
+import {GOAL_TRANSPILE} from 'state/foreman'
+import {inProgress} from 'state/transpiler'
+import {workerReady, workerBusy, WORKER_TRANSPILER} from 'state/workers'
 import {sync as glob} from 'glob'
 import {transpileToDir} from 'utils/babel'
-import * as transpiler from 'state/transpiler'
 import createLogger from 'utils/logging'
 import getConfig from 'utils/config'
+import path from 'path'
 
 const log = createLogger('workers/transpiler')
 
 export function init() {
   const store = getStore()
 
-  store.subscribe(() => stateChanged.bind(null, store))
+  store.subscribe(stateChanged.bind(null, store))
 
   process.on('message', message => {
     log.debug('Message received:', message.type)
     store.dispatch(message)
   })
 
-  process.send(ready(WORKER_TRANSPILER))
+  process.send(workerReady(WORKER_TRANSPILER))
 
   log.debug('Successfully initialized')
 }
 
 export function transpile(store) {
-  const config = getConfig()
-  const filenames = glob(config.source)
+  log.debug('Beginning transpile')
 
-  process.send(busy(WORKER_TRANSPILER))
-  store.dispatch(transpiler.started())
+  const config = getConfig()
+  const filenames = glob(path.join(config.source, config.glob))
+
+  process.send(workerBusy(WORKER_TRANSPILER))
+  store.dispatch(inProgress(true))
 
   transpileToDir({
-    outDir: config.outDir,
+    baseDir: config.source,
+    filenames,
+    outDir: config.dest,
     sourceMaps: true,
-  }, filenames)
+  })
 
-  store.dispatch(transpiler.finish())
-  process.send(ready(WORKER_TRANSPILER))
+  log.debug('Transpile complete')
+
+  store.dispatch(inProgress(false))
+  process.send(workerReady(WORKER_TRANSPILER))
 }
 
 export function stateChanged(store) {
+  log.debug('State changed')
+
   const state = store.getState()
 
-  switch (state.transpiler.get('status')) {
-    case transpiler.STATUS_STARTING:
-      transpile(store)
+  switch (state.transpiler.get('goal')) {
+    case GOAL_TRANSPILE:
+      if (!state.transpiler.get('inProgress')) {
+        transpile(store)
+      }
       break
-    case transpiler.STATUS_IN_PROGRESS:
-      throw new Error('Not sure if this can ever happen... now you know!')
     default:
       // Do nothing
   }

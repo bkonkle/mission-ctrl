@@ -18,11 +18,12 @@ describe('utils/config', () => {
 
     const expected = {
       _: [],
-      outDir: 'build',
+      dest: 'build',
+      glob: '**/*.js?(x)',
       production: false,
       quiet: false,
       silent: false,
-      source: 'src/**/*.js?(x)',
+      source: 'src',
       v: true,
       verbose: true,
     }
