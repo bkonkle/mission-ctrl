@@ -1,7 +1,7 @@
 import {expect} from 'chai'
 import {fromJS} from 'immutable'
 import {GOAL_LINT} from 'state/foreman'
-import {inProgress} from 'state/linter'
+import {inProgress} from 'workers/linter/state'
 import {mockStore} from 'utils/test'
 import {workerBusy, workerReady, WORKER_LINTER} from 'state/workers'
 import proxyquire from 'proxyquire'
@@ -11,7 +11,7 @@ describe('workers/linter', () => {
 
   const linterStub = sinon.spy()
 
-  const linter = proxyquire('./linter', {
+  const linter = proxyquire('./index', {
     'eslint': {CLIEngine: () => ({executeOnFiles: linterStub})},
   })
 

@@ -1,6 +1,6 @@
 import {getStore} from 'state/store'
 import {GOAL_TRANSPILE} from 'state/foreman'
-import {inProgress} from 'state/transpiler'
+import {inProgress} from 'workers/transpiler/state'
 import {workerReady, workerBusy, WORKER_TRANSPILER} from 'state/workers'
 import {sync as glob} from 'glob'
 import {transpileToDir} from 'utils/babel'

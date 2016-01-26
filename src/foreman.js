@@ -1,6 +1,6 @@
 import {getStore} from 'state/store'
-import {setGoal as setLinterGoal} from 'state/linter'
-import {setGoal as setTranspilerGoal} from 'state/transpiler'
+import {setGoal as setLinterGoal} from 'workers/linter/state'
+import {setGoal as setTranspilerGoal} from 'workers/transpiler/state'
 import {setGoal, GOAL_TRANSPILE, GOAL_LINT} from 'state/foreman'
 import {values} from 'ramda'
 import * as workers from 'state/workers'
