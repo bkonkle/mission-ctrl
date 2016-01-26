@@ -15,18 +15,8 @@ describe('workers/linter', () => {
     'eslint': {CLIEngine: () => ({executeOnFiles: linterStub})},
   })
 
-  afterEach(() => {
+  beforeEach(() => {
     linterStub.reset()
-  })
-
-  describe('init()', () => {
-
-    it('subscribes to state changes')
-
-    it('dispatches actions from parent process messages')
-
-    it('sends a ready message back to the parent process')
-
   })
 
   describe('lint()', () => {

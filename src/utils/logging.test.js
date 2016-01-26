@@ -15,7 +15,7 @@ describe('utils/logging', () => {
   const createLogger = logging.default
   const PlainStream = logging.PlainStream
 
-  afterEach(() => {
+  beforeEach(() => {
     createLoggerSpy.reset()
     getConfigStub.reset()
   })

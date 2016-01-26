@@ -10,7 +10,7 @@ describe('utils/config', () => {
     'findup-sync': findupStub,
   })
 
-  afterEach(() => {
+  beforeEach(() => {
     findupStub.reset()
   })
 

@@ -11,9 +11,9 @@ describe('utils/babel', () => {
 
   const chmodSpy = sinon.spy()
   const outputSpy = sinon.spy()
-  const readFileStub = sinon.stub().returns(codeEs6)
-  const statStub = sinon.stub().returns({mode: 'test'})
-  const transformStub = sinon.stub().returns({code: codeEs5})
+  const readFileStub = sinon.stub()
+  const statStub = sinon.stub()
+  const transformStub = sinon.stub()
 
   const babelUtils = proxyquire('./babel', {
     'babel-core': {transformFileSync: transformStub},
@@ -21,10 +21,10 @@ describe('utils/babel', () => {
     'utils/fs': {outputToMemFs: outputSpy},
   })
 
-  afterEach(() => {
+  beforeEach(() => {
     chmodSpy.reset()
     outputSpy.reset()
-    readFileStub.reset()
+    readFileStub.reset().returns(codeEs6)
     statStub.reset().returns({mode: 'test'})
     transformStub.reset().returns({code: codeEs5})
   })

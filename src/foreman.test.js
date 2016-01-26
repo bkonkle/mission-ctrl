@@ -17,7 +17,7 @@ describe('foreman', () => {
     'child_process': {fork: forkStub},
   })
 
-  afterEach(() => {
+  beforeEach(() => {
     forkStub.reset()
   })
 

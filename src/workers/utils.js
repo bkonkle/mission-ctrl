@@ -7,8 +7,6 @@ const log = createLogger('workers/utils')
 export const workerInit = (worker, stateChanged) => () => {
   const store = getStore()
 
-  console.log('worker ---->', worker)
-
   store.subscribe(stateChanged.bind(null, store))
 
   process.on('message', message => {

@@ -2,14 +2,13 @@ import {CLIEngine} from 'eslint'
 import {GOAL_LINT} from 'state/foreman'
 import {inProgress} from 'workers/linter/state'
 import {workerReady, workerBusy, WORKER_LINTER} from 'workers/state'
+import {workerInit} from 'workers/utils'
 import createLogger from 'utils/logging'
 import getConfig from 'utils/config'
 
 const log = createLogger('workers/linter')
 
-export function init() {
-
-}
+export const init = workerInit(WORKER_LINTER, stateChanged)
 
 export function lint(store) {
   log.debug('Beginning transpile')

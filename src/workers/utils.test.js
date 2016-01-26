@@ -7,15 +7,13 @@ describe('workers/utils', () => {
 
   const dispatchSpy = sinon.spy()
   const subscribeSpy = sinon.spy()
+  const mockStore = {dispatch: dispatchSpy, subscribe: subscribeSpy}
 
   const testUtils = proxyquire('./utils', {
-    'state/store': {getStore: () => ({
-      dispatch: dispatchSpy,
-      subscribe: subscribeSpy,
-    })},
+    'state/store': {getStore: () => mockStore},
   })
 
-  afterEach(() => {
+  beforeEach(() => {
     dispatchSpy.reset()
     subscribeSpy.reset()
     process.on.reset()
@@ -36,7 +34,7 @@ describe('workers/utils', () => {
 
       testUtils.workerInit(WORKER_TRANSPILER, callback)()
 
-      expect(process.on).to.have.been.called
+      expect(process.on).to.have.been.calledOnce
       const cb = process.on.firstCall.args[1]
       cb(message)
 

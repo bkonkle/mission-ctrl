@@ -9,53 +9,27 @@ import sinon from 'sinon'
 
 describe('workers/transpiler', () => {
   const dispatchSpy = sinon.spy()
-  const globStub = sinon.stub().returns(['src/spike.js', 'src/lee.js'])
+  const globStub = sinon.stub()
+  const initSpy = sinon.spy()
   const subscribeSpy = sinon.spy()
   const transpileSpy = sinon.spy()
+  const storeSpy = {dispatch: dispatchSpy, subscribe: subscribeSpy}
 
   const transpiler = proxyquire('./index', {
     'glob': {sync: globStub},
-    'state/store': {getStore: () => ({
-      dispatch: dispatchSpy,
-      subscribe: subscribeSpy,
-    })},
+    'state/store': {getStore: () => storeSpy},
     'utils/babel': {transpileToDir: transpileSpy},
+    'workers/utils': {workerInit: initSpy},
   })
 
-  afterEach(() => {
+  beforeEach(() => {
     dispatchSpy.reset()
-    globStub.reset()
+    globStub.reset().returns(['src/spike.js', 'src/lee.js'])
+    initSpy.reset()
     subscribeSpy.reset()
     transpileSpy.reset()
     process.on.reset()
     process.send.reset()
-  })
-
-  describe('init', () => {
-
-    it('subscribes to state changes', () => {
-      transpiler.init()
-      expect(subscribeSpy).to.have.been.calledOnceÎ
-    })
-
-    it('dispatches actions from parent process messages', () => {
-      const message = 'Test message'
-
-      transpiler.init()
-
-      expect(process.on).to.have.been.calledOnce
-
-      const callback = process.on.firstCall.args[1]
-      callback(message)
-
-      expect(dispatchSpy).to.have.been.calledWith(message)
-    })
-
-    it('sends a ready message back to the parent process', () => {
-      transpiler.init()
-      expect(process.send).to.have.been.calledWith(workerReady(WORKER_TRANSPILER))
-    })
-
   })
 
   describe('transpile()', () => {
