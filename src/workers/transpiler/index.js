@@ -1,7 +1,7 @@
 import {GOAL_TRANSPILE} from 'state/foreman'
 import {inProgress, setGoal} from 'workers/transpiler/state'
 import {sync as glob} from 'glob'
-import {workerInit} from 'workers/utils'
+import {workerInit} from 'utils/workers'
 import {workerBusy, workerDone, WORKER_TRANSPILER} from 'state/workers'
 import * as babel from 'utils/babel'
 import createLogger from 'utils/logging'
@@ -13,7 +13,7 @@ const log = createLogger('workers/transpiler')
 export const init = workerInit(WORKER_TRANSPILER, stateChanged)
 
 export function transpile(store) {
-  log.debug('Beginning transpile')
+  log.info('—— Transpiler starting ——')
 
   const config = getConfig()
   const filenames = glob(path.join(config.source, config.glob))
@@ -28,7 +28,7 @@ export function transpile(store) {
     sourceMaps: true,
   })
 
-  log.debug('Transpile complete')
+  log.info('—— Transpilation complete ——')
 
   store.dispatch(setGoal(null))
   store.dispatch(inProgress(false))

@@ -19,7 +19,7 @@ describe('workers/transpiler', () => {
     'glob': {sync: globStub},
     'state/store': {getStore: () => storeSpy},
     'utils/babel': {transpile: transpileSpy},
-    'workers/utils': {workerInit: initSpy},
+    'utils/workers': {workerInit: initSpy},
   })
 
   beforeEach(() => {

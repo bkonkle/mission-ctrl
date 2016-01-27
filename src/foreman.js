@@ -1,7 +1,7 @@
 import {getStore} from 'state/store'
 import {setGoal as setLinterGoal} from 'workers/linter/state'
 import {setGoal as setTranspilerGoal} from 'workers/transpiler/state'
-import {setGoal, GOAL_TRANSPILE, GOAL_LINT} from 'state/foreman'
+import {setGoal, GOAL_TRANSPILE, GOAL_LINT, GOAL_TEST} from 'state/foreman'
 import {values} from 'ramda'
 import * as workers from 'state/workers'
 import childProcess from 'child_process'
@@ -74,7 +74,8 @@ export function stateChanged(store, processes) {
           processes[workers.WORKER_LINTER].send(setLinterGoal(GOAL_LINT))
           break
         case workers.DONE:
-          // Next!
+          store.dispatch(setGoal(GOAL_TEST))
+          store.dispatch(workers.workerReady(workers.WORKER_LINTER))
           break
         case workers.OFFLINE:
         case workers.BUSY:
@@ -83,6 +84,8 @@ export function stateChanged(store, processes) {
         default:
           throw new Error('Unexpected state reached.')
       }
+      break
+    case GOAL_TEST:
       break
     default:
       throw new Error('Foreman has no goal')

@@ -3,7 +3,7 @@ import {fromJS} from 'immutable'
 import {mockStore} from 'utils/test'
 import {setGoal as setLinterGoal} from 'workers/linter/state'
 import {setGoal as setTranspilerGoal} from 'workers/transpiler/state'
-import {setGoal, GOAL_TRANSPILE, GOAL_LINT} from 'state/foreman'
+import {setGoal, GOAL_TRANSPILE, GOAL_LINT, GOAL_TEST} from 'state/foreman'
 import * as workers from 'state/workers'
 import path from 'path'
 import proxyquire from 'proxyquire'
@@ -166,6 +166,22 @@ describe('foreman', () => {
         foreman.stateChanged(store, processes)
 
         expect(sendSpy).to.be.calledWith(setLinterGoal(GOAL_LINT))
+      })
+
+      it('starts testing if transpilation is done', () => {
+        const dispatchSpy = sinon.spy()
+        const store = {
+          dispatch: dispatchSpy,
+          getState: () => ({
+            foreman: fromJS({goal: GOAL_LINT}),
+            workers: fromJS({[workers.WORKER_LINTER]: {status: workers.DONE}}),
+          }),
+        }
+        const processes = {[workers.WORKER_LINTER]: {send: () => {}}}
+
+        foreman.stateChanged(store, processes)
+
+        expect(dispatchSpy).to.be.calledWith(setGoal(GOAL_TEST))
       })
 
     })

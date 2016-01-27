@@ -54,6 +54,10 @@ export default function createLogger(name, level) {
     loglevel = bunyan.ERROR
   }
 
+  if (process.env.NODE_ENV === 'test') {
+    loglevel = bunyan.WARN
+  }
+
   const settings = {
     name,
     streams: [
@@ -66,4 +70,29 @@ export default function createLogger(name, level) {
   }
 
   return bunyan.createLogger(settings)
+}
+
+const timer = typeof performance !== 'undefined' && typeof performance.now === 'function' ? performance : Date
+
+export const reduxLogger = () => next => action => {
+  const log = createLogger('state/store')
+  const started = timer.now()
+
+  let result
+  let error = null
+  try {
+    result = next(action)
+  } catch (err) {
+    error = err
+  }
+
+  const duration = timer.now() - started
+
+  if (error) {
+    log.debug(`${chalk.green('action')} (${chalk.red('error')}) --> ${chalk.red(error)}`)
+  } else {
+    log.debug(`${chalk.green('action')} --> ${chalk.cyan('type:')} ${action.type} ${chalk.cyan('payload:')} ${JSON.stringify(action.payload)} (${chalk.yellow(duration)} ms)`)
+  }
+
+  return result
 }

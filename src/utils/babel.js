@@ -45,7 +45,7 @@ export function transpile({baseDir, copyFiles = false, outDir, filenames}) {
     // The code below will be needed when production builds are enabled
     // fs.chmodSync(dest, mode)
 
-    log.debug(filename + ' -> ' + dest)
+    log.info(filename + ' -> ' + path.join(outDir, relative))
   })
 }
 

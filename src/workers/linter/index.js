@@ -1,8 +1,8 @@
 import {CLIEngine} from 'eslint'
 import {GOAL_LINT} from 'state/foreman'
-import {inProgress} from 'workers/linter/state'
-import {workerReady, workerBusy, WORKER_LINTER} from 'state/workers'
-import {workerInit} from 'workers/utils'
+import {inProgress, setGoal} from 'workers/linter/state'
+import {workerBusy, workerDone, WORKER_LINTER} from 'state/workers'
+import {workerInit} from 'utils/workers'
 import createLogger from 'utils/logging'
 import getConfig from 'utils/config'
 
@@ -11,7 +11,7 @@ const log = createLogger('workers/linter')
 export const init = workerInit(WORKER_LINTER, stateChanged)
 
 export function lint(store) {
-  log.debug('Beginning transpile')
+  log.info('—— Linter starting ——')
 
   const config = getConfig()
 
@@ -20,17 +20,18 @@ export function lint(store) {
 
   const linter = new CLIEngine()
   const report = linter.executeOnFiles([config.source])
-  console.log('report ------------------>', report)
+  if (report && report.results) {
+    logReport(report)
+  }
 
-  log.debug('Transpile complete')
+  log.info('—— Linting complete ——')
 
+  store.dispatch(setGoal(null))
   store.dispatch(inProgress(false))
-  process.send(workerReady(WORKER_LINTER))
+  process.send(workerDone(WORKER_LINTER))
 }
 
 export function stateChanged(store) {
-  log.debug('State changed')
-
   const state = store.getState()
 
   switch (state.linter.get('goal')) {
@@ -42,6 +43,11 @@ export function stateChanged(store) {
     default:
       // Do nothing
   }
+}
+
+export function logReport(report, info = log.info.bind(log)) {
+  const formatter =	CLIEngine.getFormatter()
+  info(formatter(report.results))
 }
 
 if (require.main === module) {

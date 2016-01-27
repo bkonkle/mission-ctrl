@@ -1,6 +1,6 @@
 import {expect} from 'chai'
 import {fromJS} from 'immutable'
-import reducer, {workerReady, OFFLINE, READY} from './state'
+import reducer, {workerReady, OFFLINE, READY} from './workers'
 
 describe('state/workers', () => {
 

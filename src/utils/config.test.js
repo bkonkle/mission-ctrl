@@ -24,6 +24,7 @@ describe('utils/config', () => {
       quiet: false,
       silent: false,
       source: 'src',
+      trace: false,
       v: true,
       verbose: true,
     }

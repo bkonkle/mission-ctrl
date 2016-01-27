@@ -1,9 +1,10 @@
 import {expect} from 'chai'
 import {WORKER_TRANSPILER, workerReady} from 'state/workers'
+import path from 'path'
 import proxyquire from 'proxyquire'
 import sinon from 'sinon'
 
-describe('workers/utils', () => {
+describe('utils/workers', () => {
 
   const dispatchSpy = sinon.spy()
   const subscribeSpy = sinon.spy()
@@ -44,6 +45,11 @@ describe('workers/utils', () => {
     it('sends a ready message back to the parent process', () => {
       testUtils.workerInit(WORKER_TRANSPILER, () => {})()
       expect(process.send).to.have.been.calledWith(workerReady(WORKER_TRANSPILER))
+    })
+
+    it('adds the node_modules of the source to the node path', () => {
+      testUtils.workerInit(WORKER_TRANSPILER, () => {})()
+      expect(process.env.NODE_PATH).to.include(path.resolve('node_modules'))
     })
 
   })

@@ -1,39 +1,51 @@
+import {CLIEngine} from 'eslint'
 import {expect} from 'chai'
 import {fromJS} from 'immutable'
 import {GOAL_LINT} from 'state/foreman'
-import {inProgress} from 'workers/linter/state'
+import {inProgress, setGoal} from 'workers/linter/state'
 import {mockStore} from 'utils/test'
-import {workerBusy, workerReady, WORKER_LINTER} from 'state/workers'
+import {workerBusy, workerDone, WORKER_LINTER} from 'state/workers'
+import chalk from 'chalk'
 import proxyquire from 'proxyquire'
 import sinon from 'sinon'
 
 describe('workers/linter', () => {
-
-  const linterStub = sinon.spy()
+  const linterSpy = sinon.spy()
+  const mockEslint = {
+    CLIEngine: () => ({
+      executeOnFiles: linterSpy,
+    }),
+  }
+  mockEslint.CLIEngine.getFormatter = CLIEngine.getFormatter
 
   const linter = proxyquire('./index', {
-    'eslint': {CLIEngine: () => ({executeOnFiles: linterStub})},
+    'eslint': mockEslint,
   })
 
   beforeEach(() => {
-    linterStub.reset()
+    linterSpy.reset()
   })
 
   describe('lint()', () => {
 
     it('updates status before and after', done => {
-      const expectedActions = [inProgress(true), inProgress(false)]
+      const expectedActions = [inProgress(true), setGoal(null), inProgress(false)]
       const store = mockStore({}, expectedActions, done)
 
       linter.lint(store)
 
       expect(process.send).to.have.been.calledWith(workerBusy(WORKER_LINTER))
-      expect(process.send).to.have.been.calledWith(workerReady(WORKER_LINTER))
+      expect(process.send).to.have.been.calledWith(workerDone(WORKER_LINTER))
     })
 
-    it('runs linter.executeOnFiles on the source directory')
+    it('runs linter.executeOnFiles on the source directory', done => {
+      const expectedActions = [inProgress(true), setGoal(null), inProgress(false)]
+      const store = mockStore({}, expectedActions, done)
 
-    it('reports the results in a log grouped by file')
+      linter.lint(store)
+
+      expect(linterSpy).to.have.been.calledWith(['src'])
+    })
 
   })
 
@@ -51,9 +63,62 @@ describe('workers/linter', () => {
 
         linter.stateChanged(store)
 
-        expect(linterStub).to.have.been.calledWith(['src'])
+        expect(linterSpy).to.have.been.calledWith(['src'])
       })
 
+    })
+
+  })
+
+  describe('logReport()', () => {
+
+    const mockResults = {
+      results: [{
+        filePath: '/code/src/components/ecosystems/layout/index.jsx',
+        messages: [{
+          ruleId: 'comma-dangle',
+          severity: 2,
+          message: 'Missing trailing comma.',
+          line: 2,
+          column: 23,
+          nodeType: 'ExportDefaultSpecifier',
+          source: 'export RightNavSection from \'./right-nav-section\'',
+        }, {
+          ruleId: 'semi',
+          severity: 2,
+          message: 'Extra semicolon.',
+          line: 3,
+          column: 1,
+          nodeType: 'ExportNamedDeclaration',
+          source: ';',
+          fix: {range: [{}], text: ''},
+        }],
+        errorCount: 2,
+        warningCount: 0,
+      }, {
+        filePath: '/code/src/utils/text.js',
+        messages: [],
+        errorCount: 0,
+        warningCount: 0,
+      }],
+      errorCount: 2,
+      warningCount: 0,
+    }
+
+    it('formats and logs the results', () => {
+      const expected = `
+/code/src/components/ecosystems/layout/index.jsx
+  2:23  error  Missing trailing comma  comma-dangle
+  3:1   error  Extra semicolon         semi
+
+✖ 2 problems (2 errors, 0 warnings)
+`
+      const infoSpy = sinon.spy()
+
+      linter.logReport(mockResults, infoSpy)
+
+      expect(infoSpy).to.have.been.calledOnce
+      expect(chalk.stripColor(infoSpy.firstCall.args[0])).to.equal(expected)
     })
 
   })

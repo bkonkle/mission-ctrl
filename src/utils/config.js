@@ -5,7 +5,10 @@ const DEFAULTS = {
   dest: 'build',
   glob: '**/*.js?(x)',
   production: false,
+  silent: false,
   source: 'src',
+  trace: false,
+  verbose: false,
 }
 
 export default function getConfig(argv) {
@@ -14,7 +17,7 @@ export default function getConfig(argv) {
   const args = argv || process.argv.slice(2)
   const options = minimist(args, {
     alias: {verbose: 'v'},
-    boolean: ['verbose', 'quiet', 'silent'],
+    boolean: ['verbose', 'quiet', 'silent', 'trace'],
     default: {...DEFAULTS, ...config},
   })
 

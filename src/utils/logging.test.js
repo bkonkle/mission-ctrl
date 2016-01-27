@@ -4,7 +4,6 @@ import proxyquire from 'proxyquire'
 import sinon from 'sinon'
 
 describe('utils/logging', () => {
-
   const createLoggerSpy = sinon.spy()
   const getConfigStub = sinon.stub()
 
@@ -15,9 +14,16 @@ describe('utils/logging', () => {
   const createLogger = logging.default
   const PlainStream = logging.PlainStream
 
+  const origEnv = process.env.NODE_ENV
+
   beforeEach(() => {
+    process.env.NODE_ENV = 'development'
     createLoggerSpy.reset()
     getConfigStub.reset()
+  })
+
+  after(() => {
+    process.env.NODE_ENV = origEnv
   })
 
   describe('createLogger()', () => {
@@ -70,6 +76,19 @@ describe('utils/logging', () => {
       expect(result.streams[0]).to.have.property('level', bunyan.ERROR)
     })
 
+    it('sets the loglevel to "warn" if the NODE_ENV is "test"', () => {
+      process.env.NODE_ENV = 'test'
+      getConfigStub.returns({verbose: false})
+
+      createLogger('test-logging')
+
+      expect(createLoggerSpy).to.have.been.calledOnce
+      const result = createLoggerSpy.firstCall.args[0]
+
+      expect(result).to.have.property('streams').and.have.length(1)
+      expect(result.streams[0]).to.have.property('level', bunyan.WARN)
+    })
+
     it('uses the PlainStream by default', () => {
       getConfigStub.returns({verbose: false})
 
@@ -83,6 +102,12 @@ describe('utils/logging', () => {
       expect(result.streams[0]).to.have.property('stream')
         .and.be.an.instanceof(PlainStream)
     })
+
+  })
+
+  describe('reduxLogger', () => {
+
+    it('logs actions that are dispatched to the redux store')
 
   })
 
