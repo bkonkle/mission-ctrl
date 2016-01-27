@@ -2,6 +2,7 @@
 import bunyan from 'bunyan'
 import chalk from 'chalk'
 import getConfig from './config'
+import util from 'util'
 
 export class PlainStream {
   constructor(level) {
@@ -89,9 +90,9 @@ export const reduxLogger = () => next => action => {
   const duration = timer.now() - started
 
   if (error) {
-    log.debug(`${chalk.green('action')} (${chalk.red('error')}) --> ${chalk.red(error)}`)
+    log.debug(`${chalk.magenta('action')} (${chalk.red('error')}) --> ${chalk.red(error)}`)
   } else {
-    log.debug(`${chalk.green('action')} --> ${chalk.cyan('type:')} ${action.type} ${chalk.cyan('payload:')} ${JSON.stringify(action.payload)} (${chalk.yellow(duration)} ms)`)
+    log.debug(`${chalk.magenta('action')} --> ${chalk.cyan('type:')} ${action.type} ${chalk.cyan('payload:')} ${util.inspect(action.payload, {colors: true})} (${chalk.yellow(duration)} ms)`)
   }
 
   return result

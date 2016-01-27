@@ -1,7 +1,7 @@
 import {CLIEngine} from 'eslint'
 import {GOAL_LINT} from 'state/foreman'
 import {inProgress, setGoal} from 'workers/linter/state'
-import {workerBusy, workerDone, WORKER_LINTER} from 'state/workers'
+import {workerDone, WORKER_LINTER} from 'state/workers'
 import {workerInit} from 'utils/workers'
 import createLogger from 'utils/logging'
 import getConfig from 'utils/config'
@@ -15,7 +15,6 @@ export function lint(store) {
 
   const config = getConfig()
 
-  process.send(workerBusy(WORKER_LINTER))
   store.dispatch(inProgress(true))
 
   const linter = new CLIEngine()

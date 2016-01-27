@@ -18,7 +18,6 @@ export function transpile(store) {
   const config = getConfig()
   const filenames = glob(path.join(config.source, config.glob))
 
-  process.send(workerBusy(WORKER_TRANSPILER))
   store.dispatch(inProgress(true))
 
   babel.transpile({
@@ -36,8 +35,6 @@ export function transpile(store) {
 }
 
 export function stateChanged(store) {
-  log.debug('State changed')
-
   const state = store.getState()
 
   switch (state.transpiler.get('goal')) {

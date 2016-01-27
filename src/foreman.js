@@ -42,8 +42,6 @@ export function forkWorker(worker) {
 }
 
 export function stateChanged(store, processes) {
-  log.debug('State changed')
-
   const state = store.getState()
 
   switch (state.foreman.get('goal')) {
@@ -51,6 +49,7 @@ export function stateChanged(store, processes) {
       switch (state.workers.getIn([workers.WORKER_TRANSPILER, 'status'])) {
         case workers.READY:
           log.debug('Starting transpilation')
+          store.dispatch(workers.workerBusy(workers.WORKER_TRANSPILER))
           processes[workers.WORKER_TRANSPILER].send(
             setTranspilerGoal(GOAL_TRANSPILE)
           )
@@ -71,6 +70,7 @@ export function stateChanged(store, processes) {
       switch (state.workers.getIn([workers.WORKER_LINTER, 'status'])) {
         case workers.READY:
           log.debug('Starting linter')
+          store.dispatch(workers.workerBusy(workers.WORKER_LINTER))
           processes[workers.WORKER_LINTER].send(setLinterGoal(GOAL_LINT))
           break
         case workers.DONE:

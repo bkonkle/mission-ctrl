@@ -40,7 +40,6 @@ describe('workers/transpiler', () => {
 
       transpiler.transpile(store)
 
-      expect(process.send).to.have.been.calledWith(workerBusy(WORKER_TRANSPILER))
       expect(process.send).to.have.been.calledWith(workerDone(WORKER_TRANSPILER))
     })
 

@@ -4,7 +4,7 @@ import {fromJS} from 'immutable'
 import {GOAL_LINT} from 'state/foreman'
 import {inProgress, setGoal} from 'workers/linter/state'
 import {mockStore} from 'utils/test'
-import {workerBusy, workerDone, WORKER_LINTER} from 'state/workers'
+import {workerDone, WORKER_LINTER} from 'state/workers'
 import chalk from 'chalk'
 import proxyquire from 'proxyquire'
 import sinon from 'sinon'
@@ -34,7 +34,6 @@ describe('workers/linter', () => {
 
       linter.lint(store)
 
-      expect(process.send).to.have.been.calledWith(workerBusy(WORKER_LINTER))
       expect(process.send).to.have.been.calledWith(workerDone(WORKER_LINTER))
     })
 
