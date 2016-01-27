@@ -3,7 +3,6 @@ import {transformFileSync} from 'babel-core'
 import createLogger from 'utils/logging'
 import fs from 'fs'
 import path from 'path'
-import slash from 'slash'
 
 const log = createLogger('utils/babel')
 
@@ -19,24 +18,32 @@ const log = createLogger('utils/babel')
 export function transpile({baseDir, copyFiles = false, outDir, filenames}) {
   filenames.forEach(filename => {
     // remove extension and then append back on .js
-    const relative = path.relative(baseDir, filename.replace(/\.(\w*?)$/, '') + '.js')
-
-    const dest = path.join(outDir, relative)
+    const relative = path.relative(
+      path.resolve(baseDir),
+      filename.replace(/\.(\w*?)$/, '') + '.js'
+    )
+    const dest = path.resolve(path.join(outDir, relative))
 
     const data = transformFileSync(filename, {
-      sourceFileName: slash(path.relative(dest + '/..', filename)),
-      sourceMapTarget: path.basename(relative),
+      sourceFileName: path.relative(path.dirname(dest), filename),
+      sourceMapTarget: path.basename(dest),
     })
     if (!copyFiles && data.ignored) return
+
+    // The code below will be needed when production builds are enabled
+    // const mode = fs.statSync(filename).mode
 
     // Output source map
     const mapLoc = dest + '.map'
     data.code = addSourceMappingUrl(data.code, mapLoc)
     outputToMemFs(mapLoc, JSON.stringify(data.map))
+    // The code below will be needed when production builds are enabled
+    // fs.chmodSync(mapLoc, mode)
 
     // Output transpiled file
     outputToMemFs(dest, data.code)
-    fs.chmodSync(dest, fs.statSync(filename).mode)
+    // The code below will be needed when production builds are enabled
+    // fs.chmodSync(dest, mode)
 
     log.debug(filename + ' -> ' + dest)
   })

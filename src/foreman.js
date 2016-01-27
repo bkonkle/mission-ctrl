@@ -3,7 +3,7 @@ import {setGoal as setLinterGoal} from 'workers/linter/state'
 import {setGoal as setTranspilerGoal} from 'workers/transpiler/state'
 import {setGoal, GOAL_TRANSPILE, GOAL_LINT} from 'state/foreman'
 import {values} from 'ramda'
-import * as workers from 'workers/state'
+import * as workers from 'state/workers'
 import childProcess from 'child_process'
 import createLogger from 'utils/logging'
 import path from 'path'
@@ -15,6 +15,7 @@ export function init(storeOverride) {
 
   const processes = {
     [workers.WORKER_TRANSPILER]: forkWorker('transpiler'),
+    [workers.WORKER_LINTER]: forkWorker('linter'),
   }
 
   values(processes).forEach(worker => {
@@ -56,9 +57,11 @@ export function stateChanged(store, processes) {
           break
         case workers.DONE:
           store.dispatch(setGoal(GOAL_LINT))
+          store.dispatch(workers.workerReady(workers.WORKER_TRANSPILER))
           break
         case workers.OFFLINE:
-          // Do nothing, since the process is still initializing
+        case workers.BUSY:
+          // Wait
           break
         default:
           throw new Error('Unexpected state reached.')
@@ -74,7 +77,8 @@ export function stateChanged(store, processes) {
           // Next!
           break
         case workers.OFFLINE:
-          // Do nothing, since the process is still initializing
+        case workers.BUSY:
+          // Wait
           break
         default:
           throw new Error('Unexpected state reached.')

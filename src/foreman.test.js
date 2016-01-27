@@ -4,7 +4,7 @@ import {mockStore} from 'utils/test'
 import {setGoal as setLinterGoal} from 'workers/linter/state'
 import {setGoal as setTranspilerGoal} from 'workers/transpiler/state'
 import {setGoal, GOAL_TRANSPILE, GOAL_LINT} from 'state/foreman'
-import * as workers from 'workers/state'
+import * as workers from 'state/workers'
 import path from 'path'
 import proxyquire from 'proxyquire'
 import sinon from 'sinon'
@@ -104,30 +104,70 @@ describe('foreman', () => {
       ).to.throw(Error)
     })
 
-    it('starts transpilation if that is the goal', () => {
-      const sendSpy = sinon.spy()
-      const store = {getState: () => ({
-        foreman: fromJS({goal: GOAL_TRANSPILE}),
-        workers: fromJS({[workers.WORKER_TRANSPILER]: {status: workers.READY}}),
-      })}
-      const processes = {[workers.WORKER_TRANSPILER]: {send: sendSpy}}
+    describe('GOAL_TRANSPILE', () => {
 
-      foreman.stateChanged(store, processes)
+      it('starts transpilation', () => {
+        const sendSpy = sinon.spy()
+        const store = {getState: () => ({
+          foreman: fromJS({goal: GOAL_TRANSPILE}),
+          workers: fromJS({[workers.WORKER_TRANSPILER]: {status: workers.READY}}),
+        })}
+        const processes = {[workers.WORKER_TRANSPILER]: {send: sendSpy}}
 
-      expect(sendSpy).to.be.calledWith(setTranspilerGoal(GOAL_TRANSPILE))
+        foreman.stateChanged(store, processes)
+
+        expect(sendSpy).to.be.calledWith(setTranspilerGoal(GOAL_TRANSPILE))
+      })
+
+      it('starts linting if transpilation is done', () => {
+        const dispatchSpy = sinon.spy()
+        const store = {
+          dispatch: dispatchSpy,
+          getState: () => ({
+            foreman: fromJS({goal: GOAL_TRANSPILE}),
+            workers: fromJS({[workers.WORKER_TRANSPILER]: {status: workers.DONE}}),
+          }),
+        }
+        const processes = {[workers.WORKER_TRANSPILER]: {send: () => {}}}
+
+        foreman.stateChanged(store, processes)
+
+        expect(dispatchSpy).to.be.calledWith(setGoal(GOAL_LINT))
+      })
+
+      it('sets the transpiler as ready if transpilation is done', () => {
+        const dispatchSpy = sinon.spy()
+        const store = {
+          dispatch: dispatchSpy,
+          getState: () => ({
+            foreman: fromJS({goal: GOAL_TRANSPILE}),
+            workers: fromJS({[workers.WORKER_TRANSPILER]: {status: workers.DONE}}),
+          }),
+        }
+        const processes = {[workers.WORKER_TRANSPILER]: {send: () => {}}}
+
+        foreman.stateChanged(store, processes)
+
+        expect(dispatchSpy).to.be.calledWith(workers.workerReady(workers.WORKER_TRANSPILER))
+      })
+
     })
 
-    it('starts linting if transpilation is done', () => {
-      const sendSpy = sinon.spy()
-      const store = {getState: () => ({
-        foreman: fromJS({goal: GOAL_LINT}),
-        workers: fromJS({[workers.WORKER_LINTER]: {status: workers.READY}}),
-      })}
-      const processes = {[workers.WORKER_LINTER]: {send: sendSpy}}
+    describe('GOAL_LINT', () => {
 
-      foreman.stateChanged(store, processes)
+      it('starts linting', () => {
+        const sendSpy = sinon.spy()
+        const store = {getState: () => ({
+          foreman: fromJS({goal: GOAL_LINT}),
+          workers: fromJS({[workers.WORKER_LINTER]: {status: workers.READY}}),
+        })}
+        const processes = {[workers.WORKER_LINTER]: {send: sendSpy}}
 
-      expect(sendSpy).to.be.calledWith(setLinterGoal(GOAL_LINT))
+        foreman.stateChanged(store, processes)
+
+        expect(sendSpy).to.be.calledWith(setLinterGoal(GOAL_LINT))
+      })
+
     })
 
   })

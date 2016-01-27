@@ -1,9 +1,9 @@
 import {GOAL_TRANSPILE} from 'state/foreman'
-import {inProgress} from 'workers/transpiler/state'
+import {inProgress, setGoal} from 'workers/transpiler/state'
 import {sync as glob} from 'glob'
-import {transpileToDir} from 'utils/babel'
 import {workerInit} from 'workers/utils'
-import {workerReady, workerBusy, WORKER_TRANSPILER} from 'workers/state'
+import {workerBusy, workerDone, WORKER_TRANSPILER} from 'state/workers'
+import * as babel from 'utils/babel'
 import createLogger from 'utils/logging'
 import getConfig from 'utils/config'
 import path from 'path'
@@ -21,7 +21,7 @@ export function transpile(store) {
   process.send(workerBusy(WORKER_TRANSPILER))
   store.dispatch(inProgress(true))
 
-  transpileToDir({
+  babel.transpile({
     baseDir: config.source,
     filenames,
     outDir: config.dest,
@@ -30,8 +30,9 @@ export function transpile(store) {
 
   log.debug('Transpile complete')
 
+  store.dispatch(setGoal(null))
   store.dispatch(inProgress(false))
-  process.send(workerReady(WORKER_TRANSPILER))
+  process.send(workerDone(WORKER_TRANSPILER))
 }
 
 export function stateChanged(store) {
@@ -48,4 +49,8 @@ export function stateChanged(store) {
     default:
       // Do nothing
   }
+}
+
+if (require.main === module) {
+  init()
 }

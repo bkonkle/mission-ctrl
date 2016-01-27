@@ -31,3 +31,6 @@ node_modules
 
 # Yeoman state file
 .yo-rc.json
+
+# Compiled ES6 code that is included in the published package
+lib

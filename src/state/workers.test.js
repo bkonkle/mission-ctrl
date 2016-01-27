@@ -2,7 +2,7 @@ import {expect} from 'chai'
 import {fromJS} from 'immutable'
 import reducer, {workerReady, OFFLINE, READY} from './state'
 
-describe('workers/state', () => {
+describe('state/workers', () => {
 
   describe('reducer()', () => {
 

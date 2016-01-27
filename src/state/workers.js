@@ -14,8 +14,11 @@ export const WORKER_TEST_RUNNER = 'ship-yard/workers/WORKER_TEST_RUNNER'
 export const WORKER_TRANSPILER = 'ship-yard/workers/WORKER_TRANSPILER'
 
 export const initialState = fromJS({
-  [WORKER_TRANSPILER]: {error: null, status: OFFLINE},
+  [WORKER_BUNDLER]: {error: null, status: OFFLINE},
+  [WORKER_DEV_SERVER]: {error: null, status: OFFLINE},
   [WORKER_LINTER]: {error: null, status: OFFLINE},
+  [WORKER_TEST_RUNNER]: {error: null, status: OFFLINE},
+  [WORKER_TRANSPILER]: {error: null, status: OFFLINE},
 })
 
 function updateStatus(status, state, action) {

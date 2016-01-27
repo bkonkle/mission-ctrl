@@ -1,11 +1,12 @@
 import {expect} from 'chai'
+import path from 'path'
 import proxyquire from 'proxyquire'
 import sinon from 'sinon'
 
 describe('utils/babel', () => {
-  const dest = '/test/build/file.js'
-  const filenames = ['/test/src/file.js', '/test/src/file.test.js']
-  const options = {baseDir: '/test/src', filenames, outDir: '/test/build'}
+  const dest = '/code/my-project/build/file.js'
+  const filenames = ['/code/my-project/src/file.js', '/code/my-project/src/test/file.test.js']
+  const options = {baseDir: '/code/my-project/src', filenames, outDir: '/code/my-project/build'}
   const codeEs6 = 'const CODE = "CODE"'
   const codeEs5 = 'var CODE = "CODE"'
 
@@ -37,7 +38,7 @@ describe('utils/babel', () => {
       expect(transformStub).to.have.been.calledTwice
 
       const args = transformStub.firstCall.args
-      expect(args[0]).to.equal('/test/src/file.js')
+      expect(args[0]).to.equal('/code/my-project/src/file.js')
       expect(args[1]).to.have.property('sourceFileName', '../src/file.js')
       expect(args[1]).to.have.property('sourceMapTarget', 'file.js')
     })
@@ -47,6 +48,21 @@ describe('utils/babel', () => {
 
       expect(outputSpy).to.have.callCount(4)
       expect(outputSpy).to.have.been.calledWith(dest, `${codeEs5}\n//# sourceMappingURL=file.js.map`)
+    })
+
+    it('prepends a forward slash to the destination if needed', () => {
+      babelUtils.transpile({
+        baseDir: 'src',
+        filenames: [path.resolve('src/file.js'), path.resolve('src/test/file.test.js')],
+        outDir: 'build',
+      })
+
+      expect(transformStub).to.have.been.calledTwice
+
+      const args = transformStub.secondCall.args
+      expect(args[0]).to.equal(path.resolve('src/test/file.test.js'))
+      expect(args[1]).to.have.property('sourceFileName', '../../src/test/file.test.js')
+      expect(args[1]).to.have.property('sourceMapTarget', 'file.test.js')
     })
 
   })

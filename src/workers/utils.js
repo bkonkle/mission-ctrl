@@ -1,5 +1,5 @@
 import {getStore} from 'state/store'
-import {workerReady} from 'workers/state'
+import {workerReady} from 'state/workers'
 import createLogger from 'utils/logging'
 
 const log = createLogger('workers/utils')

@@ -1,9 +1,9 @@
 import {expect} from 'chai'
 import {fromJS} from 'immutable'
 import {GOAL_TRANSPILE} from 'state/foreman'
-import {inProgress} from 'workers/transpiler/state'
+import {inProgress, setGoal} from 'workers/transpiler/state'
 import {mockStore} from 'utils/test'
-import {workerBusy, workerReady, WORKER_TRANSPILER} from 'workers/state'
+import {workerBusy, workerDone, WORKER_TRANSPILER} from 'state/workers'
 import proxyquire from 'proxyquire'
 import sinon from 'sinon'
 
@@ -18,7 +18,7 @@ describe('workers/transpiler', () => {
   const transpiler = proxyquire('./index', {
     'glob': {sync: globStub},
     'state/store': {getStore: () => storeSpy},
-    'utils/babel': {transpileToDir: transpileSpy},
+    'utils/babel': {transpile: transpileSpy},
     'workers/utils': {workerInit: initSpy},
   })
 
@@ -35,17 +35,17 @@ describe('workers/transpiler', () => {
   describe('transpile()', () => {
 
     it('reports status to the worker and updates internal status', done => {
-      const expectedActions = [inProgress(true), inProgress(false)]
+      const expectedActions = [inProgress(true), setGoal(null), inProgress(false)]
       const store = mockStore({}, expectedActions, done)
 
       transpiler.transpile(store)
 
       expect(process.send).to.have.been.calledWith(workerBusy(WORKER_TRANSPILER))
-      expect(process.send).to.have.been.calledWith(workerReady(WORKER_TRANSPILER))
+      expect(process.send).to.have.been.calledWith(workerDone(WORKER_TRANSPILER))
     })
 
-    it('calls transpileToDir with the appropriate arguments', done => {
-      const expectedActions = [inProgress(true), inProgress(false)]
+    it('calls babel.transpile() with the appropriate arguments', done => {
+      const expectedActions = [inProgress(true), setGoal(null), inProgress(false)]
       const store = mockStore({}, expectedActions, done)
 
       transpiler.transpile(store)

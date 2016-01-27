@@ -1,5 +1,5 @@
 import {expect} from 'chai'
-import {WORKER_TRANSPILER, workerReady} from 'workers/state'
+import {WORKER_TRANSPILER, workerReady} from 'state/workers'
 import proxyquire from 'proxyquire'
 import sinon from 'sinon'
 
