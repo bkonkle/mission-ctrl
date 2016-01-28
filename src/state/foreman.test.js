@@ -8,14 +8,32 @@ describe('state/foreman', () => {
 
   describe('reducer', () => {
 
-    it('handles SET_GOAL actions', () => {
-      const action = foreman.setGoal(foreman.GOAL_TRANSPILE)
-      const initialState = fromJS({goal: null})
-      const expected = fromJS({goal: foreman.GOAL_TRANSPILE})
+    describe('SET_GOAL', () => {
 
-      const result = reducer(initialState, action)
+      it('sets the current goal to what was provided', () => {
+        const action = foreman.setGoal(foreman.GOAL_WATCH)
+        const initialState = fromJS({goal: null})
+        const expected = fromJS({goal: foreman.GOAL_WATCH})
 
-      expect(result).to.equal(expected)
+        const result = reducer(initialState, action)
+
+        expect(result).to.equal(expected)
+      })
+
+    })
+
+    describe('SOURCE_CHANGED', () => {
+
+      it('sets the current goal to GOAL_TRANSPILE', () => {
+        const action = foreman.sourceChanged()
+        const initialState = fromJS({goal: foreman.GOAL_WATCH})
+        const expected = fromJS({goal: foreman.GOAL_TRANSPILE})
+
+        const result = reducer(initialState, action)
+
+        expect(result).to.equal(expected)
+      })
+
     })
 
   })

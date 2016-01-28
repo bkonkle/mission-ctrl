@@ -92,7 +92,7 @@ export const reduxLogger = () => next => action => {
   if (error) {
     log.debug(`${chalk.magenta('action')} (${chalk.red('error')}) --> ${chalk.red(error)}`)
   } else {
-    log.debug(`${chalk.magenta('action')} --> ${chalk.cyan('type:')} ${action.type} ${chalk.cyan('payload:')} ${util.inspect(action.payload, {colors: true})} (${chalk.yellow(duration)} ms)`)
+    log.debug(`${chalk.magenta('action')} --> ${chalk.blue('type:')} ${action.type} ${chalk.blue('payload:')} ${util.inspect(action.payload, {colors: true})} (${chalk.yellow(duration)} ms)`)
   }
 
   return result

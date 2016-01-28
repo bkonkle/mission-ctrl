@@ -1,8 +1,9 @@
 import {getStore} from 'state/store'
 import {setGoal as setLinterGoal} from 'workers/linter/state'
 import {setGoal as setTranspilerGoal} from 'workers/transpiler/state'
-import {setGoal, GOAL_TRANSPILE, GOAL_LINT, GOAL_TEST} from 'state/foreman'
+import {setGoal as setWatcherGoal} from 'workers/watcher/state'
 import {values} from 'ramda'
+import * as foreman from 'state/foreman'
 import * as workers from 'state/workers'
 import childProcess from 'child_process'
 import createLogger from 'utils/logging'
@@ -14,6 +15,7 @@ export function init(storeOverride) {
   const store = storeOverride || getStore()
 
   const processes = {
+    [workers.WORKER_WATCHER]: forkWorker('watcher'),
     [workers.WORKER_TRANSPILER]: forkWorker('transpiler'),
     [workers.WORKER_LINTER]: forkWorker('linter'),
   }
@@ -29,7 +31,7 @@ export function init(storeOverride) {
 
   log.debug('Successfully initialized')
 
-  store.dispatch(setGoal(GOAL_TRANSPILE))
+  store.dispatch(foreman.setGoal(foreman.GOAL_WATCH))
 }
 
 export function forkWorker(worker) {
@@ -45,17 +47,37 @@ export function stateChanged(store, processes) {
   const state = store.getState()
 
   switch (state.foreman.get('goal')) {
-    case GOAL_TRANSPILE:
+    case foreman.GOAL_WATCH:
+      switch (state.workers.getIn([workers.WORKER_WATCHER, 'status'])) {
+        case workers.READY:
+          store.dispatch(workers.workerBusy(workers.WORKER_WATCHER))
+          processes[workers.WORKER_WATCHER].send(
+            setWatcherGoal(foreman.GOAL_WATCH)
+          )
+          break
+        case workers.DONE:
+          store.dispatch(foreman.setGoal(foreman.GOAL_TRANSPILE))
+          store.dispatch(workers.workerReady(workers.WORKER_WATCHER))
+          break
+        case workers.OFFLINE:
+        case workers.BUSY:
+          // Wait
+          break
+        default:
+          throw new Error('Unexpected state reached.')
+      }
+      break
+    case foreman.GOAL_TRANSPILE:
       switch (state.workers.getIn([workers.WORKER_TRANSPILER, 'status'])) {
         case workers.READY:
           log.debug('Starting transpilation')
           store.dispatch(workers.workerBusy(workers.WORKER_TRANSPILER))
           processes[workers.WORKER_TRANSPILER].send(
-            setTranspilerGoal(GOAL_TRANSPILE)
+            setTranspilerGoal(foreman.GOAL_TRANSPILE)
           )
           break
         case workers.DONE:
-          store.dispatch(setGoal(GOAL_LINT))
+          store.dispatch(foreman.setGoal(foreman.GOAL_LINT))
           store.dispatch(workers.workerReady(workers.WORKER_TRANSPILER))
           break
         case workers.OFFLINE:
@@ -66,15 +88,15 @@ export function stateChanged(store, processes) {
           throw new Error('Unexpected state reached.')
       }
       break
-    case GOAL_LINT:
+    case foreman.GOAL_LINT:
       switch (state.workers.getIn([workers.WORKER_LINTER, 'status'])) {
         case workers.READY:
           log.debug('Starting linter')
           store.dispatch(workers.workerBusy(workers.WORKER_LINTER))
-          processes[workers.WORKER_LINTER].send(setLinterGoal(GOAL_LINT))
+          processes[workers.WORKER_LINTER].send(setLinterGoal(foreman.GOAL_LINT))
           break
         case workers.DONE:
-          store.dispatch(setGoal(GOAL_TEST))
+          store.dispatch(foreman.setGoal(foreman.GOAL_TEST))
           store.dispatch(workers.workerReady(workers.WORKER_LINTER))
           break
         case workers.OFFLINE:
@@ -85,7 +107,7 @@ export function stateChanged(store, processes) {
           throw new Error('Unexpected state reached.')
       }
       break
-    case GOAL_TEST:
+    case foreman.GOAL_TEST:
       break
     default:
       throw new Error('Foreman has no goal')

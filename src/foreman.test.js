@@ -3,7 +3,8 @@ import {fromJS} from 'immutable'
 import {mockStore} from 'utils/test'
 import {setGoal as setLinterGoal} from 'workers/linter/state'
 import {setGoal as setTranspilerGoal} from 'workers/transpiler/state'
-import {setGoal, GOAL_TRANSPILE, GOAL_LINT, GOAL_TEST} from 'state/foreman'
+import {setGoal as setWatcherGoal} from 'workers/watcher/state'
+import * as foremanState from 'state/foreman'
 import * as workers from 'state/workers'
 import path from 'path'
 import proxyquire from 'proxyquire'
@@ -40,19 +41,19 @@ describe('foreman', () => {
 
     it('dispatches actions from worker messages', done => {
       const store = mockStore({}, [
-        setGoal(GOAL_TRANSPILE),
-        workers.workerReady('transpiler'),
+        foremanState.setGoal(foremanState.GOAL_WATCH),
+        workers.workerReady(workers.WORKER_WATCHER),
       ], done)
       store.subscribe = () => {}
 
       foreman.init(store)
 
-      callback(workers.workerReady('transpiler'))
+      callback(workers.workerReady(workers.WORKER_WATCHER))
     })
 
     it('subscribes to state changes', done => {
       const store = mockStore({}, [
-        setGoal(GOAL_TRANSPILE),
+        foremanState.setGoal(foremanState.GOAL_WATCH),
       ], done)
 
       store.subscribe = sinon.spy()
@@ -63,9 +64,9 @@ describe('foreman', () => {
       expect(store.subscribe.firstCall.args[0]).to.have.property('name', 'bound stateChanged')
     })
 
-    it('dispatches an initial GOAL_TRANSPILE', done => {
+    it('dispatches an initial GOAL_WATCH', done => {
       const store = mockStore({}, [
-        setGoal(GOAL_TRANSPILE),
+        foremanState.setGoal(foremanState.GOAL_WATCH),
       ], done)
       store.subscribe = () => {}
 
@@ -104,6 +105,44 @@ describe('foreman', () => {
       ).to.throw(Error)
     })
 
+    describe('GOAL_WATCH', () => {
+
+      it('starts a watcher', () => {
+        const dispatchSpy = sinon.spy()
+        const sendSpy = sinon.spy()
+        const store = {
+          dispatch: dispatchSpy,
+          getState: () => ({
+            foreman: fromJS({goal: foremanState.GOAL_WATCH}),
+            workers: fromJS({[workers.WORKER_WATCHER]: {status: workers.READY}}),
+          }),
+        }
+        const processes = {[workers.WORKER_WATCHER]: {send: sendSpy}}
+
+        foreman.stateChanged(store, processes)
+
+        expect(dispatchSpy).to.be.calledWith(workers.workerBusy(workers.WORKER_WATCHER))
+        expect(sendSpy).to.be.calledWith(setWatcherGoal(foremanState.GOAL_WATCH))
+      })
+
+      it('starts transpiling if the watcher is ready', () => {
+        const dispatchSpy = sinon.spy()
+        const store = {
+          dispatch: dispatchSpy,
+          getState: () => ({
+            foreman: fromJS({goal: foremanState.GOAL_WATCH}),
+            workers: fromJS({[workers.WORKER_WATCHER]: {status: workers.DONE}}),
+          }),
+        }
+        const processes = {[workers.WORKER_WATCHER]: {send: () => {}}}
+
+        foreman.stateChanged(store, processes)
+
+        expect(dispatchSpy).to.be.calledWith(foremanState.setGoal(foremanState.GOAL_TRANSPILE))
+      })
+
+    })
+
     describe('GOAL_TRANSPILE', () => {
 
       it('starts transpilation', () => {
@@ -112,7 +151,7 @@ describe('foreman', () => {
         const store = {
           dispatch: dispatchSpy,
           getState: () => ({
-            foreman: fromJS({goal: GOAL_TRANSPILE}),
+            foreman: fromJS({goal: foremanState.GOAL_TRANSPILE}),
             workers: fromJS({[workers.WORKER_TRANSPILER]: {status: workers.READY}}),
           }),
         }
@@ -121,7 +160,7 @@ describe('foreman', () => {
         foreman.stateChanged(store, processes)
 
         expect(dispatchSpy).to.be.calledWith(workers.workerBusy(workers.WORKER_TRANSPILER))
-        expect(sendSpy).to.be.calledWith(setTranspilerGoal(GOAL_TRANSPILE))
+        expect(sendSpy).to.be.calledWith(setTranspilerGoal(foremanState.GOAL_TRANSPILE))
       })
 
       it('starts linting if transpilation is done', () => {
@@ -129,7 +168,7 @@ describe('foreman', () => {
         const store = {
           dispatch: dispatchSpy,
           getState: () => ({
-            foreman: fromJS({goal: GOAL_TRANSPILE}),
+            foreman: fromJS({goal: foremanState.GOAL_TRANSPILE}),
             workers: fromJS({[workers.WORKER_TRANSPILER]: {status: workers.DONE}}),
           }),
         }
@@ -137,7 +176,7 @@ describe('foreman', () => {
 
         foreman.stateChanged(store, processes)
 
-        expect(dispatchSpy).to.be.calledWith(setGoal(GOAL_LINT))
+        expect(dispatchSpy).to.be.calledWith(foremanState.setGoal(foremanState.GOAL_LINT))
       })
 
       it('sets the transpiler as ready if transpilation is done', () => {
@@ -145,7 +184,7 @@ describe('foreman', () => {
         const store = {
           dispatch: dispatchSpy,
           getState: () => ({
-            foreman: fromJS({goal: GOAL_TRANSPILE}),
+            foreman: fromJS({goal: foremanState.GOAL_TRANSPILE}),
             workers: fromJS({[workers.WORKER_TRANSPILER]: {status: workers.DONE}}),
           }),
         }
@@ -166,7 +205,7 @@ describe('foreman', () => {
         const store = {
           dispatch: dispatchSpy,
           getState: () => ({
-            foreman: fromJS({goal: GOAL_LINT}),
+            foreman: fromJS({goal: foremanState.GOAL_LINT}),
             workers: fromJS({[workers.WORKER_LINTER]: {status: workers.READY}}),
           }),
         }
@@ -175,7 +214,7 @@ describe('foreman', () => {
         foreman.stateChanged(store, processes)
 
         expect(dispatchSpy).to.be.calledWith(workers.workerBusy(workers.WORKER_LINTER))
-        expect(sendSpy).to.be.calledWith(setLinterGoal(GOAL_LINT))
+        expect(sendSpy).to.be.calledWith(setLinterGoal(foremanState.GOAL_LINT))
       })
 
       it('starts testing if transpilation is done', () => {
@@ -183,7 +222,7 @@ describe('foreman', () => {
         const store = {
           dispatch: dispatchSpy,
           getState: () => ({
-            foreman: fromJS({goal: GOAL_LINT}),
+            foreman: fromJS({goal: foremanState.GOAL_LINT}),
             workers: fromJS({[workers.WORKER_LINTER]: {status: workers.DONE}}),
           }),
         }
@@ -191,7 +230,7 @@ describe('foreman', () => {
 
         foreman.stateChanged(store, processes)
 
-        expect(dispatchSpy).to.be.calledWith(setGoal(GOAL_TEST))
+        expect(dispatchSpy).to.be.calledWith(foremanState.setGoal(foremanState.GOAL_TEST))
       })
 
     })

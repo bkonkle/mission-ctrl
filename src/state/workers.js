@@ -12,6 +12,7 @@ export const WORKER_DEV_SERVER = 'ship-yard/workers/WORKER_DEV_SERVER'
 export const WORKER_LINTER = 'ship-yard/workers/WORKER_LINTER'
 export const WORKER_TEST_RUNNER = 'ship-yard/workers/WORKER_TEST_RUNNER'
 export const WORKER_TRANSPILER = 'ship-yard/workers/WORKER_TRANSPILER'
+export const WORKER_WATCHER = 'ship-yard/workers/WORKER_WATCHER'
 
 export const initialState = fromJS({
   [WORKER_BUNDLER]: {error: null, status: OFFLINE},
@@ -19,6 +20,7 @@ export const initialState = fromJS({
   [WORKER_LINTER]: {error: null, status: OFFLINE},
   [WORKER_TEST_RUNNER]: {error: null, status: OFFLINE},
   [WORKER_TRANSPILER]: {error: null, status: OFFLINE},
+  [WORKER_WATCHER]: {error: null, status: OFFLINE},
 })
 
 function updateStatus(status, state, action) {

@@ -22,6 +22,7 @@
     "babel-core": "^6.4.5",
     "bunyan": "^1.5.1",
     "chalk": "^1.1.1",
+    "chokidar": "^1.4.2",
     "eslint": "^1.10.3",
     "findup-sync": "^0.3.0",
     "fs-readdir-recursive": "^1.0.0",
