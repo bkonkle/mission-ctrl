@@ -1,5 +1,5 @@
 import {GOAL_WATCH, sourceChanged} from 'state/foreman'
-import {inProgress, setGoal} from 'workers/watcher/state'
+import {inProgress, setGoal} from 'state/watcher'
 import {WORKER_WATCHER, workerDone} from 'state/workers'
 import {workerInit} from 'utils/workers'
 import chalk from 'chalk'

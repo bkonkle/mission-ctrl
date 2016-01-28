@@ -1,7 +1,7 @@
 import {expect} from 'chai'
 import {fromJS} from 'immutable'
 import {GOAL_WATCH, sourceChanged} from 'state/foreman'
-import {inProgress, setGoal} from 'workers/watcher/state'
+import {inProgress, setGoal} from 'state/watcher'
 import {mockStore} from 'utils/test'
 import {WORKER_WATCHER, workerDone} from 'state/workers'
 import chalk from 'chalk'
@@ -11,7 +11,7 @@ import sinon from 'sinon'
 describe('workers/watcher', () => {
   const watchStub = sinon.stub().returns({on: () => {}})
 
-  const watcher = proxyquire('./index', {
+  const watcher = proxyquire('./watcher', {
     'chokidar': {watch: watchStub},
   })
 

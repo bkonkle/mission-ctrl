@@ -1,7 +1,7 @@
 import {expect} from 'chai'
 import {fromJS} from 'immutable'
 import {GOAL_TRANSPILE} from 'state/foreman'
-import {inProgress, setGoal} from 'workers/transpiler/state'
+import {inProgress, setGoal} from 'state/transpiler'
 import {mockStore} from 'utils/test'
 import {workerDone, WORKER_TRANSPILER} from 'state/workers'
 import proxyquire from 'proxyquire'
@@ -15,7 +15,7 @@ describe('workers/transpiler', () => {
   const transpileSpy = sinon.spy()
   const storeSpy = {dispatch: dispatchSpy, subscribe: subscribeSpy}
 
-  const transpiler = proxyquire('./index', {
+  const transpiler = proxyquire('./transpiler', {
     'glob': {sync: globStub},
     'state/store': {getStore: () => storeSpy},
     'utils/babel': {transpile: transpileSpy},

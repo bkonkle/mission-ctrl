@@ -1,6 +1,6 @@
 import {CLIEngine} from 'eslint'
 import {GOAL_LINT} from 'state/foreman'
-import {inProgress, setGoal} from 'workers/linter/state'
+import {inProgress, setGoal} from 'state/linter'
 import {workerDone, WORKER_LINTER} from 'state/workers'
 import {workerInit} from 'utils/workers'
 import chalk from 'chalk'

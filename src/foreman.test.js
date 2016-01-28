@@ -1,9 +1,9 @@
 import {expect} from 'chai'
 import {fromJS} from 'immutable'
 import {mockStore} from 'utils/test'
-import {setGoal as setLinterGoal} from 'workers/linter/state'
-import {setGoal as setTranspilerGoal} from 'workers/transpiler/state'
-import {setGoal as setWatcherGoal} from 'workers/watcher/state'
+import {setGoal as setLinterGoal} from 'state/linter'
+import {setGoal as setTranspilerGoal} from 'state/transpiler'
+import {setGoal as setWatcherGoal} from 'state/watcher'
 import * as foremanState from 'state/foreman'
 import * as workers from 'state/workers'
 import path from 'path'
@@ -81,7 +81,7 @@ describe('foreman', () => {
       const worker = {}
       const workerName = 'whip-creamer'
       const workerPath = path.resolve(
-        path.join(__dirname, 'workers', `${workerName}/index.js`)
+        path.join(__dirname, 'workers', `${workerName}.js`)
       )
       forkStub.returns(worker)
 

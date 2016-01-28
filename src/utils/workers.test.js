@@ -10,7 +10,7 @@ describe('utils/workers', () => {
   const subscribeSpy = sinon.spy()
   const mockStore = {dispatch: dispatchSpy, subscribe: subscribeSpy}
 
-  const testUtils = proxyquire('./utils', {
+  const workers = proxyquire('./workers', {
     'state/store': {getStore: () => mockStore},
   })
 
@@ -25,7 +25,7 @@ describe('utils/workers', () => {
 
     it('subscribes to state changes', () => {
       const callback = sinon.spy()
-      testUtils.workerInit(WORKER_TRANSPILER, callback)()
+      workers.workerInit(WORKER_TRANSPILER, callback)()
       expect(subscribeSpy).to.have.been.calledOnce
     })
 
@@ -33,7 +33,7 @@ describe('utils/workers', () => {
       const callback = sinon.spy()
       const message = {type: 'ship-yard/utils/TEST'}
 
-      testUtils.workerInit(WORKER_TRANSPILER, callback)()
+      workers.workerInit(WORKER_TRANSPILER, callback)()
 
       expect(process.on).to.have.been.calledOnce
       const cb = process.on.firstCall.args[1]
@@ -43,12 +43,12 @@ describe('utils/workers', () => {
     })
 
     it('sends a ready message back to the parent process', () => {
-      testUtils.workerInit(WORKER_TRANSPILER, () => {})()
+      workers.workerInit(WORKER_TRANSPILER, () => {})()
       expect(process.send).to.have.been.calledWith(workerReady(WORKER_TRANSPILER))
     })
 
     it('adds the node_modules of the source to the node path', () => {
-      testUtils.workerInit(WORKER_TRANSPILER, () => {})()
+      workers.workerInit(WORKER_TRANSPILER, () => {})()
       expect(process.env.NODE_PATH).to.include(path.resolve('node_modules'))
     })
 

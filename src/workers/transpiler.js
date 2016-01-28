@@ -1,5 +1,5 @@
 import {GOAL_TRANSPILE} from 'state/foreman'
-import {inProgress, setGoal} from 'workers/transpiler/state'
+import {inProgress, setGoal} from 'state/transpiler'
 import {sync as glob} from 'glob'
 import {workerInit} from 'utils/workers'
 import {workerDone, WORKER_TRANSPILER} from 'state/workers'

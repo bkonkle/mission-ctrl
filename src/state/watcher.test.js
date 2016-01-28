@@ -1,10 +1,10 @@
 import {expect} from 'chai'
 import {fromJS} from 'immutable'
 import {GOAL_WATCH} from 'state/foreman'
-import * as watcher from './state'
+import * as watcher from './watcher'
 const reducer = watcher.default
 
-describe('workers/watcher/state', () => {
+describe('state/watcher', () => {
 
   describe('reducer', () => {
 

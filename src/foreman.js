@@ -1,7 +1,7 @@
 import {getStore} from 'state/store'
-import {setGoal as setLinterGoal} from 'workers/linter/state'
-import {setGoal as setTranspilerGoal} from 'workers/transpiler/state'
-import {setGoal as setWatcherGoal} from 'workers/watcher/state'
+import {setGoal as setLinterGoal} from 'state/linter'
+import {setGoal as setTranspilerGoal} from 'state/transpiler'
+import {setGoal as setWatcherGoal} from 'state/watcher'
 import {values} from 'ramda'
 import * as foreman from 'state/foreman'
 import * as workers from 'state/workers'
@@ -36,7 +36,7 @@ export function init(storeOverride) {
 
 export function forkWorker(worker) {
   const workerPath = path.resolve(
-    path.join(__dirname, 'workers', `${worker}/index.js`)
+    path.join(__dirname, 'workers', `${worker}.js`)
   )
   return childProcess.fork(workerPath, [...process.argv.slice(2), '--color'], {
     env: {NODE_PATH: `${process.env.NODE_PATH}:${__dirname}`},

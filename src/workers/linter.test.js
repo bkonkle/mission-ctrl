@@ -2,7 +2,7 @@ import {CLIEngine} from 'eslint'
 import {expect} from 'chai'
 import {fromJS} from 'immutable'
 import {GOAL_LINT} from 'state/foreman'
-import {inProgress, setGoal} from 'workers/linter/state'
+import {inProgress, setGoal} from 'state/linter'
 import {mockStore} from 'utils/test'
 import {workerDone, WORKER_LINTER} from 'state/workers'
 import chalk from 'chalk'
@@ -18,7 +18,7 @@ describe('workers/linter', () => {
   }
   mockEslint.CLIEngine.getFormatter = CLIEngine.getFormatter
 
-  const linter = proxyquire('./index', {
+  const linter = proxyquire('./linter', {
     'eslint': mockEslint,
   })
 
