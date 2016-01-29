@@ -174,6 +174,45 @@ describe('utils/sagas', () => {
       expect(result.value).to.deep.equal(take(foreman.SET_GOAL))
     })
 
+    it('calls a callback after launching the process if one was specified', () => {
+      const callback = sinon.spy()
+      const getState = () => ({
+        workers: fromJS({[workers.WORKER_WATCHER]: {status: workers.OFFLINE}}),
+      })
+      const saga = sagas.startProcess(workers.WORKER_WATCHER, foreman.GOAL_WATCH, callback)
+      const generator = saga(getState)
+      const processWatcher = {}
+
+      generator.next()  // yields take(foreman.SET_GOAL)
+      generator.next(foreman.setGoal(foreman.GOAL_WATCH))  // yields put(workers.workerBusy(workers.WORKER_WATCHER))
+      generator.next()  // yields call(watchProcess, watcher)
+      generator.next(processWatcher) // yields fork(notifyForeman, processWatcher)
+      generator.next()  // yields take(workers.READY)
+      const result = generator.next(workers.workerReady(workers.WORKER_WATCHER))
+
+      expect(result.value).to.deep.equal(call(callback))
+    })
+
+    it('returns to watching SET_GOAL after the callback was called', () => {
+      const callback = sinon.spy()
+      const getState = () => ({
+        workers: fromJS({[workers.WORKER_WATCHER]: {status: workers.OFFLINE}}),
+      })
+      const saga = sagas.startProcess(workers.WORKER_WATCHER, foreman.GOAL_WATCH, callback)
+      const generator = saga(getState)
+      const processWatcher = {}
+
+      generator.next()  // yields take(foreman.SET_GOAL)
+      generator.next(foreman.setGoal(foreman.GOAL_WATCH))  // yields put(workers.workerBusy(workers.WORKER_WATCHER))
+      generator.next()  // yields call(watchProcess, watcher)
+      generator.next(processWatcher) // yields fork(notifyForeman, processWatcher)
+      generator.next()  // yields take(workers.READY)
+      generator.next(workers.workerReady(workers.WORKER_WATCHER))  // yields call(callback)
+      const result = generator.next()
+
+      expect(result.value).to.deep.equal(take(foreman.SET_GOAL))
+    })
+
   })
 
   describe('watchProcess()', () => {

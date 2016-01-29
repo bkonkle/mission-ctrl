@@ -6,8 +6,8 @@ import * as workers from 'state/workers'
 
 const log = createLogger('utils/sagas')
 
-export const startProcess = (worker, goal) => function* startProcessSaga(getState) {
-  log.debug('—— Watcher starting ——')
+export const startProcess = (worker, goal, callback) => function* startProcessSaga(getState) {
+  log.debug(`—— ${worker} listening ——`)
   while (true) {
     const action = yield take(foreman.SET_GOAL)
     if (action.payload.goal === goal) {
@@ -15,6 +15,7 @@ export const startProcess = (worker, goal) => function* startProcessSaga(getStat
       const status = state.workers.getIn([worker, 'status'])
 
       if (status === workers.OFFLINE) {
+        log.debug(`—— ${worker} starting ——`)
         yield put(workers.workerBusy(worker))
 
         const proc = forkWorker(worker)
@@ -24,6 +25,9 @@ export const startProcess = (worker, goal) => function* startProcessSaga(getStat
         while (true) {
           const ready = yield take(workers.READY)
           if (ready.payload.worker === worker) {
+            if (typeof callback === 'function') {
+              yield call(callback)
+            }
             break
           }
         }

@@ -8,4 +8,4 @@ require('app-module-path').addPath(
   path.resolve(path.join(__dirname, '..', 'lib'))
 )
 
-require('foreman').init()
+require('init')()

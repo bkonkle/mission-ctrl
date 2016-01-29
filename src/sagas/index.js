@@ -1,4 +1,5 @@
-import {startTranspiler} from './transpiler'
-import watcher from './watcher'
+import startForeman from './foreman'
+import startTranspiler from './transpiler'
+import startWatcher from './watcher'
 
-export default [startTranspiler, watcher]
+export default [startForeman, startTranspiler, startWatcher]

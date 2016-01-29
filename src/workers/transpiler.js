@@ -9,7 +9,9 @@ import path from 'path'
 
 const log = createLogger('workers/transpiler')
 
-export const init = workerInit(WORKER_TRANSPILER)
+export function init() {
+  workerInit(WORKER_TRANSPILER)
+}
 
 export function transpile(store) {
   const config = getConfig()

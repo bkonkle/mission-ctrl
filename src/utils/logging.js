@@ -76,6 +76,11 @@ export default function createLogger(name, level) {
 const timer = typeof performance !== 'undefined' && typeof performance.now === 'function' ? performance : Date
 
 export const reduxLogger = () => next => action => {
+  const blacklist = ['EFFECT_TRIGGERED', 'EFFECT_RESOLVED']
+  if (blacklist.indexOf(action.type) !== -1) {
+    return next(action)
+  }
+
   const log = createLogger('state/store')
   const started = timer.now()
 
