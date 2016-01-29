@@ -59,25 +59,25 @@ describe('workers/transpiler', () => {
 
   })
 
-  describe('stateChanged()', () => {
-
-    describe('GOAL_TRANSPILE', () => {
-
-      it('runs a transpile', () => {
-        const store = {
-          dispatch: () => {},
-          getState: () => ({
-            transpiler: fromJS({goal: GOAL_TRANSPILE, inProgress: false}),
-          }),
-        }
-
-        transpiler.stateChanged(store)
-
-        expect(transpileSpy).to.have.been.calledOnce
-      })
-
-    })
-
-  })
+  // describe('stateChanged()', () => {
+  //
+  //   describe('GOAL_TRANSPILE', () => {
+  //
+  //     it('runs a transpile', () => {
+  //       const store = {
+  //         dispatch: () => {},
+  //         getState: () => ({
+  //           transpiler: fromJS({goal: GOAL_TRANSPILE, inProgress: false}),
+  //         }),
+  //       }
+  //
+  //       transpiler.stateChanged(store)
+  //
+  //       expect(transpileSpy).to.have.been.calledOnce
+  //     })
+  //
+  //   })
+  //
+  // })
 
 })

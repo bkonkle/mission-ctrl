@@ -16,7 +16,7 @@ describe('utils/babel', () => {
   const statStub = sinon.stub()
   const transformStub = sinon.stub()
 
-  const babelUtils = proxyquire('./babel', {
+  const babel = proxyquire('./babel', {
     'babel-core': {transformFileSync: transformStub},
     'fs': {chmodSync: chmodSpy, readFileSync: readFileStub, statSync: statStub},
     'utils/fs': {outputToMemFs: outputSpy},
@@ -33,7 +33,7 @@ describe('utils/babel', () => {
   describe('transpile()', () => {
 
     it('calls transformFileSync() with an appropriate source file and map target', () => {
-      babelUtils.transpile(options)
+      babel.transpile(options)
 
       expect(transformStub).to.have.been.calledTwice
 
@@ -44,14 +44,14 @@ describe('utils/babel', () => {
     })
 
     it('calls outputFileSync with the results', () => {
-      babelUtils.transpile(options)
+      babel.transpile(options)
 
       expect(outputSpy).to.have.callCount(4)
       expect(outputSpy).to.have.been.calledWith(dest, `${codeEs5}\n//# sourceMappingURL=file.js.map`)
     })
 
     it('prepends a forward slash to the destination if needed', () => {
-      babelUtils.transpile({
+      babel.transpile({
         baseDir: 'src',
         filenames: [path.resolve('src/file.js'), path.resolve('src/test/file.test.js')],
         outDir: 'build',

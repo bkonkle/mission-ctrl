@@ -1,5 +1,5 @@
 import {CLIEngine} from 'eslint'
-import {GOAL_LINT} from 'state/foreman'
+// import {GOAL_LINT} from 'state/foreman'
 import {inProgress, setGoal} from 'state/linter'
 import {workerDone, WORKER_LINTER} from 'state/workers'
 import {workerInit} from 'utils/workers'
@@ -9,19 +9,19 @@ import getConfig from 'utils/config'
 
 const log = createLogger('workers/linter')
 
-export const init = workerInit(WORKER_LINTER, stateChanged)
+export const init = workerInit(WORKER_LINTER)
 
-export function stateChanged(store) {
-  const state = store.getState()
-
-  switch (state.linter.get('goal')) {
-    case GOAL_LINT:
-      if (!state.linter.get('inProgress')) lint(store)
-      break
-    default:
-      // Do nothing
-  }
-}
+// export function stateChanged(store) {
+//   const state = store.getState()
+//
+//   switch (state.linter.get('goal')) {
+//     case GOAL_LINT:
+//       if (!state.linter.get('inProgress')) lint(store)
+//       break
+//     default:
+//       // Do nothing
+//   }
+// }
 
 export function lint(store) {
   log.info('—— Linter starting ——')

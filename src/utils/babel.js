@@ -1,7 +1,6 @@
 import {outputToMemFs} from 'utils/fs'
 import {transformFileSync} from 'babel-core'
 import createLogger from 'utils/logging'
-import fs from 'fs'
 import path from 'path'
 
 const log = createLogger('utils/babel')

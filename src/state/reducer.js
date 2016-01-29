@@ -2,9 +2,8 @@ import {combineReducers} from 'redux'
 import foreman from './foreman'
 import linter from 'state/linter'
 import transpiler from 'state/transpiler'
-import watcher from 'state/watcher'
 import workers from 'state/workers'
 
 export function getReducer() {
-  return combineReducers({foreman, linter, transpiler, workers, watcher})
+  return combineReducers({foreman, linter, transpiler, workers})
 }

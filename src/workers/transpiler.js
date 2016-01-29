@@ -1,4 +1,4 @@
-import {GOAL_TRANSPILE} from 'state/foreman'
+// import {GOAL_TRANSPILE} from 'state/foreman'
 import {inProgress, setGoal} from 'state/transpiler'
 import {sync as glob} from 'glob'
 import {workerInit} from 'utils/workers'
@@ -10,21 +10,21 @@ import path from 'path'
 
 const log = createLogger('workers/transpiler')
 
-export const init = workerInit(WORKER_TRANSPILER, stateChanged)
+export const init = workerInit(WORKER_TRANSPILER)
 
-export function stateChanged(store) {
-  const state = store.getState()
-
-  switch (state.transpiler.get('goal')) {
-    case GOAL_TRANSPILE:
-      if (!state.transpiler.get('inProgress')) {
-        transpile(store)
-      }
-      break
-    default:
-      // Do nothing
-  }
-}
+// export function stateChanged(store) {
+//   const state = store.getState()
+//
+//   switch (state.transpiler.get('goal')) {
+//     case GOAL_TRANSPILE:
+//       if (!state.transpiler.get('inProgress')) {
+//         transpile(store)
+//       }
+//       break
+//     default:
+//       // Do nothing
+//   }
+// }
 
 export function transpile(store) {
   log.info('—— Transpiler starting ——')

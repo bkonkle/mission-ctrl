@@ -1,4 +1,6 @@
+import 'babel-polyfill'
 import chai from 'chai'
+import chaiAsPromised from 'chai-as-promised'
 import chaiImmutable from 'chai-immutable'
 import configureStore from 'redux-mock-store'
 import sourceMaps from 'source-map-support'
@@ -8,6 +10,7 @@ import thunkMiddleware from 'redux-thunk'
 
 sourceMaps.install()
 
+chai.use(chaiAsPromised)
 chai.use(chaiImmutable)
 chai.use(sinonChai)
 

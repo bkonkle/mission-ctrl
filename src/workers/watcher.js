@@ -1,5 +1,4 @@
-import {GOAL_WATCH, sourceChanged} from 'state/foreman'
-import {inProgress, setGoal} from 'state/watcher'
+import {sourceChanged} from 'state/foreman'
 import {WORKER_WATCHER, workerDone} from 'state/workers'
 import {workerInit} from 'utils/workers'
 import chalk from 'chalk'
@@ -10,34 +9,31 @@ import path from 'path'
 
 const log = createLogger('workers/watcher')
 
-export const init = workerInit(WORKER_WATCHER, stateChanged)
-
-export function stateChanged(store) {
-  const state = store.getState()
-
-  switch (state.watcher.get('goal')) {
-    case GOAL_WATCH:
-      if (!state.watcher.get('inProgress')) watch(store)
-      break
-    default:
-      // Do nothing
-  }
+export function init() {
+  workerInit(WORKER_WATCHER)()
+  watch()
 }
 
-export function watch(store) {
-  log.info('—— Watcher starting ——')
+// export function stateChanged(store) {
+//   const state = store.getState()
+//
+//   switch (state.watcher.get('goal')) {
+//     case GOAL_WATCH:
+//       if (!state.watcher.get('inProgress')) watch(store)
+//       break
+//     default:
+//       // Do nothing
+//   }
+// }
 
+export function watch() {
   const config = getConfig()
-
-  store.dispatch(inProgress(true))
 
   chokidar.watch(path.join(config.source, config.glob), {ignoreInitial: true})
     .on('all', reportChange)
 
   log.info('—— Watcher started ——')
 
-  store.dispatch(setGoal(null))
-  store.dispatch(inProgress(false))
   process.send(workerDone(WORKER_WATCHER))
 }
 

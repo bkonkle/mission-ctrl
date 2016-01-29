@@ -1,1 +1,6 @@
-{"extends": "ecliptic/base"}
+{
+  "extends": "ecliptic/base",
+  "rules": {
+    "no-constant-condition": 0
+  }
+}

@@ -48,26 +48,26 @@ describe('workers/linter', () => {
 
   })
 
-  describe('stateChanged()', () => {
-
-    describe('GOAL_LINT', () => {
-
-      it('runs the linter', () => {
-        const store = {
-          dispatch: () => {},
-          getState: () => ({
-            linter: fromJS({goal: GOAL_LINT, inProgress: false}),
-          }),
-        }
-
-        linter.stateChanged(store)
-
-        expect(linterSpy).to.have.been.calledWith(['src'])
-      })
-
-    })
-
-  })
+  // describe('stateChanged()', () => {
+  //
+  //   describe('GOAL_LINT', () => {
+  //
+  //     it('runs the linter', () => {
+  //       const store = {
+  //         dispatch: () => {},
+  //         getState: () => ({
+  //           linter: fromJS({goal: GOAL_LINT, inProgress: false}),
+  //         }),
+  //       }
+  //
+  //       linter.stateChanged(store)
+  //
+  //       expect(linterSpy).to.have.been.calledWith(['src'])
+  //     })
+  //
+  //   })
+  //
+  // })
 
   describe('logReport()', () => {
 
