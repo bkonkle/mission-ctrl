@@ -1,6 +1,7 @@
 import 'babel-polyfill'
 import {getStore} from 'state/store'
 import {workerReady} from 'state/workers'
+import * as workers from 'state/workers'
 import childProcess from 'child_process'
 import createLogger from 'utils/logging'
 import findup from 'findup-sync'
@@ -31,8 +32,12 @@ export const workerInit = worker => () => {
 }
 
 export function forkWorker(worker) {
+  const name = ({
+    [workers.WORKER_WATCHER]: 'watcher',
+  })[worker]
+
   const workerPath = path.resolve(
-    path.join(path.dirname(__dirname), 'workers', `${worker}.js`)
+    path.join(path.dirname(__dirname), 'workers', `${name}.js`)
   )
   return childProcess.fork(workerPath, [...process.argv.slice(2), '--color'], {
     env: {NODE_PATH: `${process.env.NODE_PATH}:${path.dirname(__dirname)}`},

@@ -1,5 +1,5 @@
 import {expect} from 'chai'
-import {WORKER_TRANSPILER, workerReady} from 'state/workers'
+import {WORKER_TRANSPILER, WORKER_WATCHER, workerReady} from 'state/workers'
 import path from 'path'
 import proxyquire from 'proxyquire'
 import sinon from 'sinon'
@@ -59,13 +59,14 @@ describe('utils/workers', () => {
 
     it('calls child_process.fork on the requested worker', () => {
       const worker = {}
-      const workerName = 'whip-creamer'
+      const workerId = WORKER_WATCHER
+      const workerName = 'watcher'
       const workerPath = path.resolve(
         path.join(path.dirname(__dirname), 'workers', `${workerName}.js`)
       )
       forkStub.returns(worker)
 
-      const result = workers.forkWorker(workerName)
+      const result = workers.forkWorker(workerId)
 
       expect(forkStub).to.be.calledWith(workerPath)
       expect(result).to.equal(worker)

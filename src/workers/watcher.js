@@ -14,18 +14,6 @@ export function init() {
   watch()
 }
 
-// export function stateChanged(store) {
-//   const state = store.getState()
-//
-//   switch (state.watcher.get('goal')) {
-//     case GOAL_WATCH:
-//       if (!state.watcher.get('inProgress')) watch(store)
-//       break
-//     default:
-//       // Do nothing
-//   }
-// }
-
 export function watch() {
   const config = getConfig()
 

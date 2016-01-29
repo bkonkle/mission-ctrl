@@ -1,3 +1,4 @@
-import {startWatcher} from './watcher'
+import {startTranspiler} from './transpiler'
+import watcher from './watcher'
 
-export default [startWatcher]
+export default [startTranspiler, watcher]

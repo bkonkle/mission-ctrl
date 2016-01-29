@@ -1,7 +1,5 @@
 import {expect} from 'chai'
-import {fromJS} from 'immutable'
-import {GOAL_TRANSPILE} from 'state/foreman'
-import {inProgress, setGoal} from 'state/transpiler'
+import {inProgress} from 'state/transpiler'
 import {mockStore} from 'utils/test'
 import {workerDone, WORKER_TRANSPILER} from 'state/workers'
 import proxyquire from 'proxyquire'
@@ -35,7 +33,7 @@ describe('workers/transpiler', () => {
   describe('transpile()', () => {
 
     it('reports status to the worker and updates internal status', done => {
-      const expectedActions = [inProgress(true), setGoal(null), inProgress(false)]
+      const expectedActions = [inProgress(true), inProgress(false)]
       const store = mockStore({}, expectedActions, done)
 
       transpiler.transpile(store)
@@ -44,7 +42,7 @@ describe('workers/transpiler', () => {
     })
 
     it('calls babel.transpile() with the appropriate arguments', done => {
-      const expectedActions = [inProgress(true), setGoal(null), inProgress(false)]
+      const expectedActions = [inProgress(true), inProgress(false)]
       const store = mockStore({}, expectedActions, done)
 
       transpiler.transpile(store)
@@ -58,26 +56,5 @@ describe('workers/transpiler', () => {
     })
 
   })
-
-  // describe('stateChanged()', () => {
-  //
-  //   describe('GOAL_TRANSPILE', () => {
-  //
-  //     it('runs a transpile', () => {
-  //       const store = {
-  //         dispatch: () => {},
-  //         getState: () => ({
-  //           transpiler: fromJS({goal: GOAL_TRANSPILE, inProgress: false}),
-  //         }),
-  //       }
-  //
-  //       transpiler.stateChanged(store)
-  //
-  //       expect(transpileSpy).to.have.been.calledOnce
-  //     })
-  //
-  //   })
-  //
-  // })
 
 })
