@@ -12,7 +12,14 @@ export class PlainStream {
   write(rec) {
     const prefix = message => {
       if (this.level < bunyan.INFO) {
-        return `[${chalk.blue(rec.name)}] ${message}`
+
+        let pid = ''
+        const config = getConfig()
+        if (config.trace) {
+          pid = ' ' + chalk.grey(process.pid)
+        }
+
+        return `[${chalk.blue(rec.name)}${pid}] ${message}`
       }
       return message
     }
@@ -76,8 +83,10 @@ export default function createLogger(name, level) {
 const timer = typeof performance !== 'undefined' && typeof performance.now === 'function' ? performance : Date
 
 export const reduxLogger = () => next => action => {
+  const config = getConfig()
+
   const blacklist = ['EFFECT_TRIGGERED', 'EFFECT_RESOLVED']
-  if (blacklist.indexOf(action.type) !== -1) {
+  if (!config.trace || blacklist.indexOf(action.type) !== -1) {
     return next(action)
   }
 

@@ -1,16 +1,21 @@
-import {applyMiddleware, createStore as reduxCreateStore} from 'redux'
-import {getReducer} from './reducer'
+import {applyMiddleware, createStore} from 'redux'
+import {combineReducers} from 'redux'
 import {reduxLogger} from 'utils/logging'
-import getConfig from 'utils/config'
+import foreman from './foreman'
+import linter from 'state/linter'
 import sagaMiddleware from 'redux-saga'
-import sagas from '../sagas'
 import thunkMiddleware from 'redux-thunk'
+import transpiler from 'state/transpiler'
+import workers from 'state/workers'
 
-export function createStore(initialState) {
-  const config = getConfig()
-
-  const middleware = [thunkMiddleware, sagaMiddleware(...sagas)]
-  if (config.trace) middleware.push(reduxLogger)
-
-  return applyMiddleware(...middleware)(reduxCreateStore)(getReducer(), initialState)
+export function newStore(saga, initialState) {
+  return createStore(
+    combineReducers({foreman, linter, transpiler, workers}),
+    initialState,
+    applyMiddleware(
+      thunkMiddleware,
+      sagaMiddleware(saga),
+      reduxLogger
+    )
+  )
 }

@@ -1,31 +1,19 @@
 import {CLIEngine} from 'eslint'
-// import {GOAL_LINT} from 'state/foreman'
-import {inProgress, setGoal} from 'state/linter'
+import {inProgress} from 'state/linter'
 import {workerDone, WORKER_LINTER} from 'state/workers'
 import {workerInit} from 'utils/workers'
 import chalk from 'chalk'
 import createLogger from 'utils/logging'
 import getConfig from 'utils/config'
+import saga from 'sagas/linter'
 
 const log = createLogger('workers/linter')
 
-export const init = workerInit(WORKER_LINTER)
-
-// export function stateChanged(store) {
-//   const state = store.getState()
-//
-//   switch (state.linter.get('goal')) {
-//     case GOAL_LINT:
-//       if (!state.linter.get('inProgress')) lint(store)
-//       break
-//     default:
-//       // Do nothing
-//   }
-// }
+export function init() {
+  workerInit(WORKER_LINTER, saga)
+}
 
 export function lint(store) {
-  log.info('—— Linter starting ——')
-
   const config = getConfig()
 
   store.dispatch(inProgress(true))
@@ -36,7 +24,6 @@ export function lint(store) {
 
   log.info('—— Linting complete ——')
 
-  store.dispatch(setGoal(null))
   store.dispatch(inProgress(false))
   process.send(workerDone(WORKER_LINTER))
 }

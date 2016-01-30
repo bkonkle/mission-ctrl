@@ -1,39 +1,17 @@
 import {call, fork, put, take} from 'redux-saga'
 import {forkWorker} from 'utils/workers'
-import createLogger from 'utils/logging'
+import {WORKERS} from 'state/workers'
 import * as foreman from 'state/foreman'
-import * as workers from 'state/workers'
+import createLogger from 'utils/logging'
 
 const log = createLogger('utils/sagas')
 
-export const startProcess = (worker, goal, callback) => function* startProcessSaga(getState) {
-  log.debug(`—— ${worker} listening ——`)
-  while (true) {
-    const action = yield take(foreman.SET_GOAL)
-    if (action.payload.goal === goal) {
-      const state = getState()
-      const status = state.workers.getIn([worker, 'status'])
+export function* launchWorker(worker) {
+  log.debug(`—— ${WORKERS[worker].name} starting ——`)
+  const proc = yield call(forkWorker, worker)
+  const processWatcher = yield call(watchProcess, proc)
 
-      if (status === workers.OFFLINE) {
-        log.debug(`—— ${worker} starting ——`)
-        yield put(workers.workerBusy(worker))
-
-        const proc = forkWorker(worker)
-        const processWatcher = yield call(watchProcess, proc)
-        yield fork(notifyForeman, processWatcher)
-
-        while (true) {
-          const ready = yield take(workers.READY)
-          if (ready.payload.worker === worker) {
-            if (typeof callback === 'function') {
-              yield call(callback)
-            }
-            break
-          }
-        }
-      }
-    }
-  }
+  yield fork(notifyForeman, processWatcher)
 }
 
 export function watchProcess(proc) {
@@ -63,5 +41,23 @@ export function* notifyForeman(messageSource) {
     const message = yield call(messageSource.nextMessage)
     log.debug('Message received:', message.type)
     yield put(message)
+  }
+}
+
+export function* waitForStatus(worker, status) {
+  while (true) {
+    const action = yield take(status)
+    if (action.payload.worker === worker) {
+      return
+    }
+  }
+}
+
+export function* waitForGoal(goal) {
+  while (true) {
+    const action = yield take(foreman.SET_GOAL)
+    if (action.payload.goal === goal) {
+      return
+    }
   }
 }

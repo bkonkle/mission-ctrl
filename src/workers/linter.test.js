@@ -1,8 +1,6 @@
 import {CLIEngine} from 'eslint'
 import {expect} from 'chai'
-import {fromJS} from 'immutable'
-import {GOAL_LINT} from 'state/foreman'
-import {inProgress, setGoal} from 'state/linter'
+import {inProgress} from 'state/linter'
 import {mockStore} from 'utils/test'
 import {workerDone, WORKER_LINTER} from 'state/workers'
 import chalk from 'chalk'
@@ -29,7 +27,7 @@ describe('workers/linter', () => {
   describe('lint()', () => {
 
     it('updates status before and after', done => {
-      const expectedActions = [inProgress(true), setGoal(null), inProgress(false)]
+      const expectedActions = [inProgress(true), inProgress(false)]
       const store = mockStore({}, expectedActions, done)
 
       linter.lint(store)
@@ -38,7 +36,7 @@ describe('workers/linter', () => {
     })
 
     it('runs linter.executeOnFiles on the source directory', done => {
-      const expectedActions = [inProgress(true), setGoal(null), inProgress(false)]
+      const expectedActions = [inProgress(true), inProgress(false)]
       const store = mockStore({}, expectedActions, done)
 
       linter.lint(store)
@@ -47,27 +45,6 @@ describe('workers/linter', () => {
     })
 
   })
-
-  // describe('stateChanged()', () => {
-  //
-  //   describe('GOAL_LINT', () => {
-  //
-  //     it('runs the linter', () => {
-  //       const store = {
-  //         dispatch: () => {},
-  //         getState: () => ({
-  //           linter: fromJS({goal: GOAL_LINT, inProgress: false}),
-  //         }),
-  //       }
-  //
-  //       linter.stateChanged(store)
-  //
-  //       expect(linterSpy).to.have.been.calledWith(['src'])
-  //     })
-  //
-  //   })
-  //
-  // })
 
   describe('logReport()', () => {
 

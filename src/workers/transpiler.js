@@ -6,11 +6,12 @@ import * as babel from 'utils/babel'
 import createLogger from 'utils/logging'
 import getConfig from 'utils/config'
 import path from 'path'
+import saga from 'sagas/transpiler'
 
 const log = createLogger('workers/transpiler')
 
 export function init() {
-  workerInit(WORKER_TRANSPILER)
+  workerInit(WORKER_TRANSPILER, saga)
 }
 
 export function transpile(store) {

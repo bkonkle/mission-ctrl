@@ -7,12 +7,22 @@ export const ERROR = 'ship-yard/workers/ERROR'
 export const OFFLINE = 'ship-yard/workers/OFFLINE'
 export const READY = 'ship-yard/workers/READY'
 export const STOP = 'ship-yard/workers/STOP'
+
 export const WORKER_BUNDLER = 'ship-yard/workers/WORKER_BUNDLER'
 export const WORKER_DEV_SERVER = 'ship-yard/workers/WORKER_DEV_SERVER'
 export const WORKER_LINTER = 'ship-yard/workers/WORKER_LINTER'
 export const WORKER_TEST_RUNNER = 'ship-yard/workers/WORKER_TEST_RUNNER'
 export const WORKER_TRANSPILER = 'ship-yard/workers/WORKER_TRANSPILER'
 export const WORKER_WATCHER = 'ship-yard/workers/WORKER_WATCHER'
+
+export const WORKERS = {
+  [WORKER_BUNDLER]: {name: 'Bundler', path: 'workers/bundler'},
+  [WORKER_DEV_SERVER]: {name: 'Dev Server', path: 'workers/dev-server'},
+  [WORKER_LINTER]: {name: 'Linter', path: 'workers/linter'},
+  [WORKER_TEST_RUNNER]: {name: 'Test Runner', path: 'workers/test-runner'},
+  [WORKER_TRANSPILER]: {name: 'Transpiler', path: 'workers/transpiler'},
+  [WORKER_WATCHER]: {name: 'Watcher', path: 'workers/watcher'},
+}
 
 export const initialState = fromJS({
   [WORKER_BUNDLER]: {error: null, status: OFFLINE},

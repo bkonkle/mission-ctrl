@@ -6,11 +6,12 @@ import chokidar from 'chokidar'
 import createLogger from 'utils/logging'
 import getConfig from 'utils/config'
 import path from 'path'
+import saga from 'sagas/watcher'
 
 const log = createLogger('workers/watcher')
 
 export function init() {
-  workerInit(WORKER_WATCHER)()
+  workerInit(WORKER_WATCHER, saga)
   watch()
 }
 
@@ -27,7 +28,7 @@ export function watch() {
 
 export function reportChange(event, file, info = log.info.bind(log)) {
   info(`${chalk.yellow(event)} --> ${file}`)
-  process.send(sourceChanged())
+  process.send(sourceChanged(file))
 }
 
 if (require.main === module) {

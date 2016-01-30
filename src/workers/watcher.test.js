@@ -24,27 +24,6 @@ describe('workers/watcher', () => {
 
   })
 
-  // describe('stateChanged()', () => {
-  //
-  //   describe('GOAL_WATCH', () => {
-  //
-  //     it('runs the watcher', () => {
-  //       const store = {
-  //         dispatch: () => {},
-  //         getState: () => ({
-  //           linter: fromJS({goal: GOAL_WATCH, inProgress: false}),
-  //         }),
-  //       }
-  //
-  //       watcher.stateChanged(store)
-  //
-  //       expect(watchStub).to.have.been.calledWith('src/**/*.js?(x)')
-  //     })
-  //
-  //   })
-  //
-  // })
-
   describe('reportChange()', () => {
 
     it('reports the type of event and the path', () => {
@@ -66,7 +45,7 @@ describe('workers/watcher', () => {
 
       watcher.reportChange(event, file, infoSpy)
 
-      expect(process.send).to.have.been.calledWith(sourceChanged())
+      expect(process.send).to.have.been.calledWith(sourceChanged(file))
     })
 
   })
