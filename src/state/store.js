@@ -9,13 +9,12 @@ import transpiler from 'state/transpiler'
 import workers from 'state/workers'
 
 export function newStore(saga, initialState) {
+  const middleware = [thunkMiddleware, reduxLogger]
+  if (saga) middleware.push(sagaMiddleware(saga))
+
   return createStore(
     combineReducers({foreman, linter, transpiler, workers}),
     initialState,
-    applyMiddleware(
-      thunkMiddleware,
-      sagaMiddleware(saga),
-      reduxLogger
-    )
+    applyMiddleware(...middleware)
   )
 }

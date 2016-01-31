@@ -1,18 +1,17 @@
 import {createAction, handleActions} from 'redux-actions'
 import {fromJS} from 'immutable'
 
-export const IN_PROGRESS = 'ship-yard/linter/IN_PROGRESS'
-export const SET_GOAL = 'ship-yard/linter/SET_GOAL'
+export const DONE = 'ship-yard/linter/DONE'
+export const LINT = 'ship-yard/linter/LINT'
 
 const initialState = fromJS({
-  goal: null,
   inProgress: null,
 })
 
 export default handleActions({
-  [IN_PROGRESS]: (state, action) => state.set('inProgress', action.payload),
-  [SET_GOAL]: (state, action) => state.set('goal', action.payload),
+  [DONE]: state => state.set('inProgress', false),
+  [LINT]: state => state.set('inProgress', true),
 }, initialState)
 
-export const inProgress = createAction(IN_PROGRESS)
-export const setGoal = createAction(SET_GOAL)
+export const done = createAction(DONE)
+export const lint = createAction(LINT)

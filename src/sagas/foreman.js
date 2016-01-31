@@ -1,5 +1,6 @@
 import {call, fork, put, take} from 'redux-saga'
-import {launchWorker, waitForReady, waitForDone} from 'utils/sagas'
+import {launchWorker, waitForReady, waitForDone, waitForGoal} from 'utils/sagas'
+import {lint} from 'state/linter'
 import {GOAL_BUNDLE, GOAL_LINT, GOAL_TEST, GOAL_TRANSPILE, GOAL_WATCH,
         SOURCE_CHANGED, setGoal, sourceChanged} from 'state/foreman'
 import {WORKER_BUNDLER, WORKER_LINTER, WORKER_TEST_RUNNER, WORKER_TRANSPILER,
@@ -9,12 +10,11 @@ import createLogger from 'utils/logging'
 const log = createLogger('sagas/foreman')
 
 export default function* startForeman() {
-  yield fork(startWatcher)
-  yield fork(startLinter)
   yield fork(startTranspiler)
+  yield fork(startLinter)
+  yield call(startWatcher)
   yield put(setGoal(GOAL_WATCH))
-  yield call(waitForReady, WORKER_WATCHER)
-  yield call(runLoop)
+  yield fork(runLoop)
   yield put(sourceChanged('__all__'))
 }
 
@@ -23,14 +23,18 @@ export function* startWatcher() {
   yield call(waitForReady, WORKER_WATCHER)
 }
 
-export function* startLinter() {
-  yield call(launchWorker, WORKER_LINTER)
-  yield call(waitForReady, WORKER_LINTER)
-}
-
 export function* startTranspiler() {
   yield call(launchWorker, WORKER_TRANSPILER)
   yield call(waitForReady, WORKER_TRANSPILER)
+}
+
+export function* startLinter() {
+  const linter = yield call(launchWorker, WORKER_LINTER)
+  yield call(waitForReady, WORKER_LINTER)
+  while (true) {
+    yield call(waitForGoal, GOAL_LINT)
+    linter.send(lint())
+  }
 }
 
 export function* runLoop() {

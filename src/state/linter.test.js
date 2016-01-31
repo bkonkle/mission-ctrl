@@ -1,19 +1,17 @@
 import {expect} from 'chai'
 import {fromJS} from 'immutable'
-import {GOAL_LINT} from 'state/foreman'
-import * as linter from './linter'
-const reducer = linter.default
+import reducer, {done, lint} from './linter'
 
 describe('state/linter', () => {
 
   describe('reducer', () => {
 
-    describe('IN_PROGRESS', () => {
+    describe('DONE', () => {
 
-      it('sets the inProgress flag', () => {
-        const action = linter.inProgress(true)
-        const initialState = fromJS({inProgress: false})
-        const expected = fromJS({inProgress: true})
+      it('sets the inProgress flag to false', () => {
+        const action = done()
+        const initialState = fromJS({inProgress: true})
+        const expected = fromJS({inProgress: false})
 
         const result = reducer(initialState, action)
 
@@ -22,12 +20,12 @@ describe('state/linter', () => {
 
     })
 
-    describe('SET_GOAL', () => {
+    describe('LINT', () => {
 
-      it('sets the current goal of the transpiler', () => {
-        const action = linter.setGoal(GOAL_LINT)
-        const initialState = fromJS({goal: null})
-        const expected = fromJS({goal: GOAL_LINT})
+      it('sets the inProgress flag to true', () => {
+        const action = lint()
+        const initialState = fromJS({inProgress: false})
+        const expected = fromJS({inProgress: true})
 
         const result = reducer(initialState, action)
 

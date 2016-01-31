@@ -12,6 +12,7 @@ export function* launchWorker(worker) {
   const processWatcher = yield call(watchProcess, proc)
 
   yield fork(notifyForeman, processWatcher)
+  return proc
 }
 
 export function watchProcess(proc) {

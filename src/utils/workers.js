@@ -28,7 +28,7 @@ export const workerInit = (worker, saga, storeOverride) => {
 
   process.send(workerReady(worker))
 
-  log.debug(`${WORKERS[worker].name} successfully initialized`)
+  log.debug(`—— ${WORKERS[worker].name} successfully initialized ——`)
 }
 
 export function forkWorker(worker) {

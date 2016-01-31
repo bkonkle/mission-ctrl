@@ -1,7 +1,5 @@
 import {CLIEngine} from 'eslint'
 import {expect} from 'chai'
-import {inProgress} from 'state/linter'
-import {mockStore} from 'utils/test'
 import {workerDone, WORKER_LINTER} from 'state/workers'
 import chalk from 'chalk'
 import proxyquire from 'proxyquire'
@@ -26,21 +24,8 @@ describe('workers/linter', () => {
 
   describe('lint()', () => {
 
-    it('updates status before and after', done => {
-      const expectedActions = [inProgress(true), inProgress(false)]
-      const store = mockStore({}, expectedActions, done)
-
-      linter.lint(store)
-
-      expect(process.send).to.have.been.calledWith(workerDone(WORKER_LINTER))
-    })
-
-    it('runs linter.executeOnFiles on the source directory', done => {
-      const expectedActions = [inProgress(true), inProgress(false)]
-      const store = mockStore({}, expectedActions, done)
-
-      linter.lint(store)
-
+    it('runs linter.executeOnFiles on the source directory', () => {
+      linter.lint()
       expect(linterSpy).to.have.been.calledWith(['src'])
     })
 

@@ -32,6 +32,12 @@ describe('utils/sagas', () => {
       expect(result.value).to.deep.equal(fork(notifyForeman, processWatcher))
     })
 
+    it('returns the proc so that messages can be sent to the worker', () => {
+      const result = generator.next()
+      expect(result.done).to.be.true
+      expect(result.value).to.equal(proc)
+    })
+
   })
 
   describe('watchProcess()', () => {
@@ -93,7 +99,7 @@ describe('utils/sagas', () => {
 
     it('completes the saga when the event is received', () => {
       const result = generator.next(workerReady(WORKER_WATCHER))
-      expect(result.value).to.be.undefined
+      expect(result.done).to.be.true
     })
 
     it('continues waiting if the status event was for another worker', () => {
@@ -124,7 +130,7 @@ describe('utils/sagas', () => {
 
     it('completes the saga', () => {
       const result = generator.next()
-      expect(result.value).to.be.undefined
+      expect(result.done).to.be.true
     })
 
   })
@@ -159,7 +165,7 @@ describe('utils/sagas', () => {
 
     it('completes the saga when the event is received', () => {
       const result = generator.next(setGoal(GOAL_WATCH))
-      expect(result.value).to.be.undefined
+      expect(result.done).to.be.true
     })
 
     it('continues waiting if the event was for another goal', () => {
