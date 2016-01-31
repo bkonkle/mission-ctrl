@@ -40,7 +40,7 @@ export function watchProcess(proc) {
 export function* notifyForeman(messageSource) {
   while (true) {
     const message = yield call(messageSource.nextMessage)
-    log.debug('Message received:', message.type)
+    log.trace('Message received:', message.type)
     yield put(message)
   }
 }

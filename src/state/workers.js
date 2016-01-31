@@ -16,12 +16,12 @@ export const WORKER_TRANSPILER = 'ship-yard/workers/WORKER_TRANSPILER'
 export const WORKER_WATCHER = 'ship-yard/workers/WORKER_WATCHER'
 
 export const WORKERS = {
-  [WORKER_BUNDLER]: {name: 'Bundler', path: 'workers/bundler'},
-  [WORKER_DEV_SERVER]: {name: 'Dev Server', path: 'workers/dev-server'},
-  [WORKER_LINTER]: {name: 'Linter', path: 'workers/linter'},
-  [WORKER_TEST_RUNNER]: {name: 'Test Runner', path: 'workers/test-runner'},
-  [WORKER_TRANSPILER]: {name: 'Transpiler', path: 'workers/transpiler'},
-  [WORKER_WATCHER]: {name: 'Watcher', path: 'workers/watcher'},
+  [WORKER_BUNDLER]: {name: 'Bundler'},
+  [WORKER_DEV_SERVER]: {name: 'Dev Server'},
+  [WORKER_LINTER]: {name: 'Linter'},
+  [WORKER_TEST_RUNNER]: {name: 'Test Runner'},
+  [WORKER_TRANSPILER]: {name: 'Transpiler'},
+  [WORKER_WATCHER]: {name: 'Watcher'},
 }
 
 export const initialState = fromJS({

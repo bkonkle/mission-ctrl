@@ -58,15 +58,14 @@ describe('utils/workers', () => {
     it('calls child_process.fork on the requested worker', () => {
       const worker = {}
       const workerId = WORKER_WATCHER
-      const workerName = 'watcher'
       const workerPath = path.resolve(
-        path.join(path.dirname(__dirname), 'workers', `${workerName}.js`)
+        path.join(path.dirname(__dirname), 'init.js')
       )
       forkStub.returns(worker)
 
       const result = workers.forkWorker(workerId)
 
-      expect(forkStub).to.be.calledWith(workerPath)
+      expect(forkStub).to.be.calledWith(workerPath, [workerId, ...process.argv.slice(2), '--color'])
       expect(result).to.equal(worker)
     })
 

@@ -1,6 +1,7 @@
 import {call, fork, put, take} from 'redux-saga'
 import {launchWorker, waitForReady, waitForDone, waitForGoal} from 'utils/sagas'
 import {lint} from 'state/linter'
+import {transpile} from 'state/transpiler'
 import {GOAL_BUNDLE, GOAL_LINT, GOAL_TEST, GOAL_TRANSPILE, GOAL_WATCH,
         SOURCE_CHANGED, setGoal, sourceChanged} from 'state/foreman'
 import {WORKER_BUNDLER, WORKER_LINTER, WORKER_TEST_RUNNER, WORKER_TRANSPILER,
@@ -24,8 +25,12 @@ export function* startWatcher() {
 }
 
 export function* startTranspiler() {
-  yield call(launchWorker, WORKER_TRANSPILER)
+  const transpiler = yield call(launchWorker, WORKER_TRANSPILER)
   yield call(waitForReady, WORKER_TRANSPILER)
+  while (true) {
+    yield call(waitForGoal, GOAL_TRANSPILE)
+    yield call(transpiler.send.bind(transpiler), transpile())
+  }
 }
 
 export function* startLinter() {
@@ -33,7 +38,7 @@ export function* startLinter() {
   yield call(waitForReady, WORKER_LINTER)
   while (true) {
     yield call(waitForGoal, GOAL_LINT)
-    linter.send(lint())
+    yield call(linter.send.bind(linter), lint())
   }
 }
 

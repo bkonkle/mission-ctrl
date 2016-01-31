@@ -33,9 +33,9 @@ export const workerInit = (worker, saga, storeOverride) => {
 
 export function forkWorker(worker) {
   const workerPath = path.resolve(
-    path.join(path.dirname(__dirname), `${WORKERS[worker].path}.js`)
+    path.join(path.dirname(__dirname), 'init.js')
   )
-  return childProcess.fork(workerPath, [...process.argv.slice(2), '--color'], {
+  return childProcess.fork(workerPath, [worker, ...process.argv.slice(2), '--color'], {
     env: {NODE_PATH: `${process.env.NODE_PATH}:${path.dirname(__dirname)}`},
   })
 }

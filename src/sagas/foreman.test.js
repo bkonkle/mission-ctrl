@@ -4,10 +4,10 @@ import {GOAL_BUNDLE, GOAL_LINT, GOAL_TEST, GOAL_TRANSPILE, GOAL_WATCH,
         SOURCE_CHANGED, setGoal, sourceChanged} from 'state/foreman'
 import {launchWorker, waitForReady, waitForDone, waitForGoal} from 'utils/sagas'
 import {lint} from 'state/linter'
+import {transpile} from 'state/transpiler'
 import {WORKER_BUNDLER, WORKER_LINTER, WORKER_TEST_RUNNER, WORKER_TRANSPILER,
         WORKER_WATCHER, workerReady} from 'state/workers'
 import * as foreman from './foreman'
-import sinon from 'sinon'
 
 const startForeman = foreman.default
 
@@ -64,25 +64,39 @@ describe('sagas/foreman', () => {
   })
 
   describe('startTranspiler', () => {
+    const transpiler = {send: () => {}}
+    const generator = foreman.startTranspiler()
 
     it('launches the transpiler process', () => {
-      const generator = foreman.startTranspiler()
       const result = generator.next()
       expect(result.value).to.deep.equal(call(launchWorker, WORKER_TRANSPILER))
     })
 
     it('waits for it to be ready', () => {
-      const generator = foreman.startTranspiler()
-      generator.next()  // yields call(launchWorker(WORKER_TRANSPILER))
-      const result = generator.next()
-
+      const result = generator.next(transpiler)
       expect(result.value).to.deep.equal(call(waitForReady, WORKER_TRANSPILER))
+    })
+
+    it('waits for GOAL_TRANSPILE events', () => {
+      const result = generator.next(workerReady(WORKER_TRANSPILER))
+      expect(result.value).to.deep.equal(call(waitForGoal, GOAL_TRANSPILE))
+    })
+
+    it('sends TRANSPILE events to the worker', () => {
+      const result = generator.next()
+      expect(result.value.CALL.fn).have.property('name', 'bound send')
+      expect(result.value.CALL.args[0]).to.deep.equal(transpile())
+    })
+
+    it('goes back to waiting for GOAL_TRANSPILE events', () => {
+      const result = generator.next()
+      expect(result.value).to.deep.equal(call(waitForGoal, GOAL_TRANSPILE))
     })
 
   })
 
   describe('startLinter', () => {
-    const linter = {send: sinon.spy()}
+    const linter = {send: () => {}}
     const generator = foreman.startLinter()
 
     it('launches the linter process', () => {
@@ -101,8 +115,9 @@ describe('sagas/foreman', () => {
     })
 
     it('sends LINT events to the worker', () => {
-      generator.next()
-      expect(linter.send).to.have.been.calledWith(lint())
+      const result = generator.next()
+      expect(result.value.CALL.fn).have.property('name', 'bound send')
+      expect(result.value.CALL.args[0]).to.deep.equal(lint())
     })
 
     it('goes back to waiting for GOAL_LINT events', () => {

@@ -1,8 +1,10 @@
 import {call, put, take} from 'redux-saga'
+import {CLIEngine} from 'eslint'
 import {done, LINT} from 'state/linter'
-import {lint} from 'workers/linter'
 import {WORKER_LINTER, workerDone} from 'state/workers'
+import chalk from 'chalk'
 import createLogger from 'utils/logging'
+import getConfig from 'utils/config'
 
 const log = createLogger('sagas/linter')
 
@@ -12,6 +14,30 @@ export default function* initLinter() {
     yield take(LINT)
     yield call(lint)
     yield put(done())
-    process.send(workerDone(WORKER_LINTER))
+    yield call(process.send.bind(process), workerDone(WORKER_LINTER))
+  }
+}
+
+export function getEngine() {
+  return new CLIEngine({extensions: ['.js', '.jsx']})
+}
+
+export function* lint() {
+  const config = getConfig()
+
+  const linter = yield call(getEngine)
+  const report = yield call(linter.executeOnFiles, [config.source])
+  if (report && report.results) yield call(logReport, report)
+
+  log.info('—— Linting complete ——')
+}
+
+export function* logReport(report, info = log.info.bind(log)) {
+  const formatter =	yield call(CLIEngine.getFormatter)
+  const results = yield call(formatter, report.results)
+  if (results) {
+    yield call(info, results)
+  } else {
+    yield call(info, `Your code is ${chalk.green('lint free')}! 👍`)
   }
 }

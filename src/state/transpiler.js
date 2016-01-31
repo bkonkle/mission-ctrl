@@ -1,7 +1,7 @@
 import {createAction, handleActions} from 'redux-actions'
 import {fromJS} from 'immutable'
 
-export const IN_PROGRESS = 'ship-yard/transpiler/IN_PROGRESS'
+export const DONE = 'ship-yard/transpiler/DONE'
 export const TRANSPILE = 'ship-yard/transpiler/TRANSPILE'
 
 const initialState = fromJS({
@@ -9,7 +9,9 @@ const initialState = fromJS({
 })
 
 export default handleActions({
-  [IN_PROGRESS]: (state, action) => state.set('inProgress', action.payload),
+  [DONE]: state => state.set('inProgress', false),
+  [TRANSPILE]: state => state.set('inProgress', true),
 }, initialState)
 
-export const inProgress = createAction(IN_PROGRESS)
+export const done = createAction(DONE)
+export const transpile = createAction(TRANSPILE)
