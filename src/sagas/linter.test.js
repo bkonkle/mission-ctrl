@@ -59,7 +59,8 @@ describe('sagas/linter', () => {
 
     it('calls the linter on the source', () => {
       const result = generator.next(linter)
-      expect(result.value).to.deep.equal(call(linter.executeOnFiles, ['src']))
+      expect(result.value.CALL.fn).to.have.property('name', 'bound executeOnFiles')
+      expect(result.value.CALL.args[0]).to.deep.equal(['src'])
     })
 
     it('calls logReport if there were results', () => {
