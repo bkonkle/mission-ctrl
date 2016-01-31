@@ -1,7 +1,7 @@
-import {call, fork, put, take} from 'redux-saga'
+import {call, fork, join, put, take} from 'redux-saga'
 import {forkWorker} from 'utils/workers'
-import {WORKERS} from 'state/workers'
-import * as foreman from 'state/foreman'
+import {SET_GOAL} from 'state/foreman'
+import {DONE, READY, WORKERS} from 'state/workers'
 import createLogger from 'utils/logging'
 
 const log = createLogger('utils/sagas')
@@ -44,18 +44,37 @@ export function* notifyForeman(messageSource) {
   }
 }
 
-export function* waitForStatus(worker, status) {
-  while (true) {
-    const action = yield take(status)
-    if (action.payload.worker === worker) {
-      return
+export function* waitForStatus(status, workers) {
+  if (Array.isArray(workers)) {
+    const tasks = []
+    for (const wkr of workers) {
+      const task = yield fork(waitForStatus, status, wkr)
+      tasks.push(task)
+    }
+    for (const task of tasks) {
+      yield join(task)
+    }
+  } else {
+    while (true) {
+      const action = yield take(status)
+      if (action.payload.worker === workers) {
+        return
+      }
     }
   }
 }
 
+export function* waitForReady(workers) {
+  yield call(waitForStatus, READY, workers)
+}
+
+export function* waitForDone(workers) {
+  yield call(waitForStatus, DONE, workers)
+}
+
 export function* waitForGoal(goal) {
   while (true) {
-    const action = yield take(foreman.SET_GOAL)
+    const action = yield take(SET_GOAL)
     if (action.payload.goal === goal) {
       return
     }

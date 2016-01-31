@@ -20,5 +20,5 @@ export default handleActions({
   [SOURCE_CHANGED]: state => state.set('goal', GOAL_TRANSPILE),
 }, initialState)
 
-export const setGoal = createAction(SET_GOAL, goal => ({goal}))
+export const setGoal = createAction(SET_GOAL, (goal, data) => ({goal, ...data}))
 export const sourceChanged = createAction(SOURCE_CHANGED)

@@ -1,84 +1,141 @@
-import {call, fork, put} from 'redux-saga'
+import {call, fork, put, take} from 'redux-saga'
 import {expect} from 'chai'
-import {launchWorker, waitForStatus} from 'utils/sagas'
+import {launchWorker, waitForReady, waitForDone} from 'utils/sagas'
 import * as foreman from './foreman'
-import * as foremanState from 'state/foreman'
-import * as workers from 'state/workers'
+import {GOAL_BUNDLE, GOAL_LINT, GOAL_TEST, GOAL_TRANSPILE, GOAL_WATCH,
+        SOURCE_CHANGED, setGoal, sourceChanged} from 'state/foreman'
+import {WORKER_BUNDLER, WORKER_LINTER, WORKER_TEST_RUNNER, WORKER_TRANSPILER,
+        WORKER_WATCHER, workerReady} from 'state/workers'
 
 const startForeman = foreman.default
 
 describe('sagas/foreman', () => {
 
   describe('startForeman()', () => {
+    const generator = startForeman()
 
     it('forks the watcher process', () => {
-      const generator = startForeman()
       const result = generator.next()
-
       expect(result.value).to.deep.equal(fork(foreman.startWatcher))
     })
 
     it('forks the linter process', () => {
-      const generator = startForeman()
-      generator.next()  // yields fork(startWatcher)
       const result = generator.next()
-
       expect(result.value).to.deep.equal(fork(foreman.startLinter))
     })
 
     it('forks the transpiler process', () => {
-      const generator = startForeman()
-      generator.next()  // yields fork(startWatcher)
-      generator.next()  // yields fork(startLinter)
       const result = generator.next()
-
       expect(result.value).to.deep.equal(fork(foreman.startTranspiler))
     })
 
     it('sets the goal to GOAL_WATCH', () => {
-      const generator = startForeman()
-      generator.next()  // yields fork(startWatcher)
-      generator.next()  // yields fork(startLinter)
-      generator.next()  // yields fork(startTranspiler)
       const result = generator.next()
+      expect(result.value).to.deep.equal(put(setGoal(GOAL_WATCH)))
+    })
 
-      expect(result.value).to.deep.equal(put(foremanState.setGoal(foremanState.GOAL_WATCH)))
+    it('waits for the watcher to be READY', () => {
+      const result = generator.next()
+      expect(result.value).to.deep.equal(call(waitForReady, WORKER_WATCHER))
+    })
+
+    it('kicks off the main event loop', () => {
+      const result = generator.next()
+      expect(result.value).to.deep.equal(call(foreman.runLoop))
+    })
+
+    it('sends an initial source changed event with "__all__" as the payload', () => {
+      const result = generator.next()
+      expect(result.value).to.deep.equal(put(sourceChanged('__all__')))
+    })
+
+  })
+
+  describe('runLoop', () => {
+    const generator = foreman.runLoop()
+
+    it('waits for a source changed event', () => {
+      const result = generator.next()
+      expect(result.value).to.deep.equal(take(SOURCE_CHANGED))
+    })
+
+    it('sets the goal to GOAL_TRANSPILE with the changed file in the payload', () => {
+      const result = generator.next(sourceChanged('file.js'))
+      expect(result.value).to.deep.equal(
+        put(setGoal(GOAL_TRANSPILE, {path: 'file.js'}))
+      )
+    })
+
+    it('waits for the transpiler to be DONE', () => {
+      const result = generator.next()
+      expect(result.value).to.deep.equal(call(waitForDone, WORKER_TRANSPILER))
+    })
+
+    it('sets the transpiler to READY', () => {
+      const result = generator.next()
+      expect(result.value).to.deep.equal(put(workerReady(WORKER_TRANSPILER)))
+    })
+
+    it('sets the goal to GOAL_LINT', () => {
+      const result = generator.next()
+      expect(result.value).to.deep.equal(put(setGoal(GOAL_LINT, {path: 'file.js'})))
+    })
+
+    it('sets the goal to GOAL_TEST', () => {
+      const result = generator.next()
+      expect(result.value).to.deep.equal(put(setGoal(GOAL_TEST, {path: 'file.js'})))
+    })
+
+    it('waits for the linter and test runner to be DONE', () => {
+      const result = generator.next()
+      expect(result.value).to.deep.equal(call(
+        waitForDone, [WORKER_LINTER, WORKER_TEST_RUNNER]
+      ))
+    })
+
+    it('sets the goal to GOAL_BUNDLE', () => {
+      const result = generator.next()
+      expect(result.value).to.deep.equal(put(setGoal(GOAL_BUNDLE)))
+    })
+
+    it('waits for the bundler to be DONE', () => {
+      const result = generator.next()
+      expect(result.value).to.deep.equal(call(waitForDone, WORKER_BUNDLER))
+    })
+
+    it('returns to waiting for a source changed event', () => {
+      const result = generator.next()
+      expect(result.value).to.deep.equal(take(SOURCE_CHANGED))
     })
 
   })
 
   describe('startWatcher', () => {
+    const generator = foreman.startWatcher()
 
     it('launches the watcher process', () => {
-      const generator = foreman.startWatcher()
       const result = generator.next()
-      expect(result.value).to.deep.equal(call(launchWorker, workers.WORKER_WATCHER))
+      expect(result.value).to.deep.equal(call(launchWorker, WORKER_WATCHER))
     })
 
     it('waits for it to be ready', () => {
-      const generator = foreman.startWatcher()
-      generator.next()  // yields call(launchWorker(WORKER_WATCHER))
       const result = generator.next()
-
-      expect(result.value).to.deep.equal(call(waitForStatus, workers.WORKER_WATCHER, workers.READY))
+      expect(result.value).to.deep.equal(call(waitForReady, WORKER_WATCHER))
     })
 
   })
 
   describe('startLinter', () => {
+    const generator = foreman.startLinter()
 
     it('launches the linter process', () => {
-      const generator = foreman.startLinter()
       const result = generator.next()
-      expect(result.value).to.deep.equal(call(launchWorker, workers.WORKER_LINTER))
+      expect(result.value).to.deep.equal(call(launchWorker, WORKER_LINTER))
     })
 
     it('waits for it to be ready', () => {
-      const generator = foreman.startLinter()
-      generator.next()  // yields call(launchWorker(WORKER_LINTER))
       const result = generator.next()
-
-      expect(result.value).to.deep.equal(call(waitForStatus, workers.WORKER_LINTER, workers.READY))
+      expect(result.value).to.deep.equal(call(waitForReady, WORKER_LINTER))
     })
 
   })
@@ -88,7 +145,7 @@ describe('sagas/foreman', () => {
     it('launches the transpiler process', () => {
       const generator = foreman.startTranspiler()
       const result = generator.next()
-      expect(result.value).to.deep.equal(call(launchWorker, workers.WORKER_TRANSPILER))
+      expect(result.value).to.deep.equal(call(launchWorker, WORKER_TRANSPILER))
     })
 
     it('waits for it to be ready', () => {
@@ -96,7 +153,7 @@ describe('sagas/foreman', () => {
       generator.next()  // yields call(launchWorker(WORKER_TRANSPILER))
       const result = generator.next()
 
-      expect(result.value).to.deep.equal(call(waitForStatus, workers.WORKER_TRANSPILER, workers.READY))
+      expect(result.value).to.deep.equal(call(waitForReady, WORKER_TRANSPILER))
     })
 
   })

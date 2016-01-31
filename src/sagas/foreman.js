@@ -1,7 +1,9 @@
-import {call, fork, put} from 'redux-saga'
-import {launchWorker, waitForStatus} from 'utils/sagas'
-import * as foreman from 'state/foreman'
-import * as workers from 'state/workers'
+import {call, fork, put, take} from 'redux-saga'
+import {launchWorker, waitForReady, waitForDone} from 'utils/sagas'
+import {GOAL_BUNDLE, GOAL_LINT, GOAL_TEST, GOAL_TRANSPILE, GOAL_WATCH,
+        SOURCE_CHANGED, setGoal, sourceChanged} from 'state/foreman'
+import {WORKER_BUNDLER, WORKER_LINTER, WORKER_TEST_RUNNER, WORKER_TRANSPILER,
+        WORKER_WATCHER, workerReady} from 'state/workers'
 import createLogger from 'utils/logging'
 
 const log = createLogger('sagas/foreman')
@@ -10,20 +12,39 @@ export default function* startForeman() {
   yield fork(startWatcher)
   yield fork(startLinter)
   yield fork(startTranspiler)
-  yield put(foreman.setGoal(foreman.GOAL_WATCH))
+  yield put(setGoal(GOAL_WATCH))
+  yield call(waitForReady, WORKER_WATCHER)
+  yield call(runLoop)
+  yield put(sourceChanged('__all__'))
 }
 
 export function* startWatcher() {
-  yield call(launchWorker, workers.WORKER_WATCHER)
-  yield call(waitForStatus, workers.WORKER_WATCHER, workers.READY)
+  yield call(launchWorker, WORKER_WATCHER)
+  yield call(waitForReady, WORKER_WATCHER)
 }
 
 export function* startLinter() {
-  yield call(launchWorker, workers.WORKER_LINTER)
-  yield call(waitForStatus, workers.WORKER_LINTER, workers.READY)
+  yield call(launchWorker, WORKER_LINTER)
+  yield call(waitForReady, WORKER_LINTER)
 }
 
 export function* startTranspiler() {
-  yield call(launchWorker, workers.WORKER_TRANSPILER)
-  yield call(waitForStatus, workers.WORKER_TRANSPILER, workers.READY)
+  yield call(launchWorker, WORKER_TRANSPILER)
+  yield call(waitForReady, WORKER_TRANSPILER)
+}
+
+export function* runLoop() {
+  log.debug('—— Starting main loop ——')
+  while (true) {
+    const action = yield take(SOURCE_CHANGED)
+    const path = action.payload
+    yield put(setGoal(GOAL_TRANSPILE, {path}))
+    yield call(waitForDone, WORKER_TRANSPILER)
+    yield put(workerReady(WORKER_TRANSPILER))
+    yield put(setGoal(GOAL_LINT, {path}))
+    yield put(setGoal(GOAL_TEST, {path}))
+    yield call(waitForDone, [WORKER_LINTER, WORKER_TEST_RUNNER])
+    yield put(setGoal(GOAL_BUNDLE))
+    yield call(waitForDone, WORKER_BUNDLER)
+  }
 }

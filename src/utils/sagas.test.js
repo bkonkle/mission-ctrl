@@ -1,42 +1,35 @@
-import {call, fork, put, take} from 'redux-saga'
+import {call, fork, join, put, take} from 'redux-saga'
 import {expect} from 'chai'
 import {forkWorker} from 'utils/workers'
-import * as foreman from 'state/foreman'
-import * as sagas from './sagas'
-import * as workers from 'state/workers'
+import {GOAL_LINT, GOAL_WATCH, SET_GOAL, setGoal} from 'state/foreman'
+import {DONE, READY, WORKER_LINTER, WORKER_TEST_RUNNER, WORKER_WATCHER,
+        workerBusy, workerReady} from 'state/workers'
+import {TASK} from 'redux-saga/lib/utils'
+import {launchWorker, watchProcess, notifyForeman, waitForStatus,
+        waitForReady, waitForDone, waitForGoal} from './sagas'
 import sinon from 'sinon'
 
 describe('utils/sagas', () => {
 
   describe('launchWorker()', () => {
+    const proc = {}
+    const processWatcher = {}
+
+    const generator = launchWorker(WORKER_WATCHER)
 
     it('spawns a worker process', () => {
-      const generator = sagas.launchWorker(workers.WORKER_WATCHER)
       const result = generator.next()
-
-      expect(result.value).to.deep.equal(call(forkWorker, workers.WORKER_WATCHER))
+      expect(result.value).to.deep.equal(call(forkWorker, WORKER_WATCHER))
     })
 
     it('creates a process watcher', () => {
-      const proc = {}
-      const generator = sagas.launchWorker(workers.WORKER_WATCHER)
-      generator.next()  // yields call(forkWorker, worker)
-
       const result = generator.next(proc)
-
-      expect(result.value).to.deep.equal(call(sagas.watchProcess, proc))
+      expect(result.value).to.deep.equal(call(watchProcess, proc))
     })
 
     it('forks a notifier saga to report to the foreman', () => {
-      const proc = {}
-      const processWatcher = {}
-      const generator = sagas.launchWorker(workers.WORKER_WATCHER)
-      generator.next()  // yields call(forkWorker, worker)
-      generator.next(proc)  // yields call(watchProcess, proc)
-
       const result = generator.next(processWatcher)
-
-      expect(result.value).to.deep.equal(fork(sagas.notifyForeman, processWatcher))
+      expect(result.value).to.deep.equal(fork(notifyForeman, processWatcher))
     })
 
   })
@@ -45,21 +38,21 @@ describe('utils/sagas', () => {
 
     it('attaches an "on" callback to the process', () => {
       const mockProcess = {on: sinon.spy(), send: sinon.spy()}
-      sagas.watchProcess(mockProcess)
+      watchProcess(mockProcess)
       expect(mockProcess.on).to.have.been.calledOnce
     })
 
     it('returns an object with a function that returns a promise for the next message', () => {
       const mockProcess = {on: sinon.spy(), send: sinon.spy()}
-      const processWatcher = sagas.watchProcess(mockProcess)
+      const processWatcher = watchProcess(mockProcess)
       expect(processWatcher).to.have.property('nextMessage').and.be.a.function
       const callback = mockProcess.on.firstCall.args[1]
       expect(callback).to.be.a.function
 
       const promise = processWatcher.nextMessage()
-      callback(workers.workerBusy(workers.WORKER_WATCHER))
+      callback(workerBusy(WORKER_WATCHER))
 
-      expect(promise).to.eventually.equal(workers.workerBusy(workers.WORKER_WATCHER))
+      expect(promise).to.eventually.equal(workerBusy(WORKER_WATCHER))
     })
 
   })
@@ -68,7 +61,7 @@ describe('utils/sagas', () => {
 
     it('calls nextMessage on the process watcher', () => {
       const messageSource = {nextMessage: () => {}}
-      const generator = sagas.notifyForeman(messageSource)
+      const generator = notifyForeman(messageSource)
 
       const result = generator.next()
       expect(result.value).to.deep.equal(call(messageSource.nextMessage))
@@ -76,66 +69,105 @@ describe('utils/sagas', () => {
 
     it('dispatches any messages received', () => {
       const messageSource = {nextMessage: () => {}}
-      const generator = sagas.notifyForeman(messageSource)
+      const generator = notifyForeman(messageSource)
       generator.next()  // yields call(messageSource.nextMessage)
 
-      const result = generator.next(workers.workerBusy(workers.WORKER_WATCHER))
+      const result = generator.next(workerBusy(WORKER_WATCHER))
 
-      expect(result.value).to.deep.equal(put(workers.workerBusy(workers.WORKER_WATCHER)))
+      expect(result.value).to.deep.equal(put(workerBusy(WORKER_WATCHER)))
     })
 
   })
 
   describe('waitForStatus()', () => {
+    const linterTask = {[TASK]: true}
+    const testRunnerTask = {[TASK]: true}
+
+    let generator = waitForStatus(READY, WORKER_WATCHER)
 
     it('waits for a status event for the given worker', () => {
-      const generator = sagas.waitForStatus(workers.WORKER_WATCHER, workers.READY)
       const result = generator.next()
 
-      expect(result.value).to.deep.equal(take(workers.READY))
+      expect(result.value).to.deep.equal(take(READY))
     })
 
     it('completes the saga when the event is received', () => {
-      const generator = sagas.waitForStatus(workers.WORKER_WATCHER, workers.READY)
-      generator.next()  // yields take(workers.READY)
-      const result = generator.next(workers.workerReady(workers.WORKER_WATCHER))
-
+      const result = generator.next(workerReady(WORKER_WATCHER))
       expect(result.value).to.be.undefined
     })
 
     it('continues waiting if the status event was for another worker', () => {
-      const generator = sagas.waitForStatus(workers.WORKER_WATCHER, workers.READY)
-      generator.next()  // yields take(workers.READY)
-      const result = generator.next(workers.workerReady(workers.WORKER_LINTER))
+      generator = waitForStatus(READY, WORKER_WATCHER)
+      generator.next()  // yields take(READY)
+      const result = generator.next(workerReady(WORKER_LINTER))
 
-      expect(result.value).to.deep.equal(take(workers.READY))
+      expect(result.value).to.deep.equal(take(READY))
+    })
+
+    it('forks multiple waitForStatus instances if an array of workers was given', () => {
+      generator = waitForStatus(READY, [WORKER_LINTER, WORKER_TEST_RUNNER])
+
+      let result = generator.next()
+      expect(result.value).to.deep.equal(fork(waitForStatus, READY, WORKER_LINTER))
+
+      result = generator.next(linterTask)
+      expect(result.value).to.deep.equal(fork(waitForStatus, READY, WORKER_TEST_RUNNER))
+    })
+
+    it('waits for the multiple instances to complete', () => {
+      let result = generator.next(testRunnerTask)
+      expect(result.value).to.deep.equal(join(linterTask))
+
+      result = generator.next()
+      expect(result.value).to.deep.equal(join(testRunnerTask))
+    })
+
+    it('completes the saga', () => {
+      const result = generator.next()
+      expect(result.value).to.be.undefined
+    })
+
+  })
+
+  describe('waitForReady()', () => {
+
+    it('calls waitForStatus with READY and the given workers', () => {
+      const generator = waitForReady(WORKER_LINTER)
+      const result = generator.next()
+      expect(result.value).to.deep.equal(call(waitForStatus, READY, WORKER_LINTER))
+    })
+
+  })
+
+  describe('waitForDone()', () => {
+
+    it('calls waitForStatus with DONE and the given workers', () => {
+      const generator = waitForDone(WORKER_LINTER)
+      const result = generator.next()
+      expect(result.value).to.deep.equal(call(waitForStatus, DONE, WORKER_LINTER))
     })
 
   })
 
   describe('waitForGoal()', () => {
+    let generator = waitForGoal(GOAL_WATCH)
 
     it('waits for a set goal event for the given worker', () => {
-      const generator = sagas.waitForGoal(foreman.GOAL_WATCH)
       const result = generator.next()
-
-      expect(result.value).to.deep.equal(take(foreman.SET_GOAL))
+      expect(result.value).to.deep.equal(take(SET_GOAL))
     })
 
     it('completes the saga when the event is received', () => {
-      const generator = sagas.waitForGoal(foreman.GOAL_WATCH)
-      generator.next()  // yields take(foreman.SET_GOAL)
-      const result = generator.next(foreman.setGoal(foreman.GOAL_WATCH))
-
+      const result = generator.next(setGoal(GOAL_WATCH))
       expect(result.value).to.be.undefined
     })
 
     it('continues waiting if the event was for another goal', () => {
-      const generator = sagas.waitForGoal(foreman.GOAL_WATCH)
-      generator.next()  // yields take(foreman.SET_GOAL)
-      const result = generator.next(foreman.setGoal(foreman.GOAL_LINT))
+      generator = waitForGoal(GOAL_WATCH)
+      generator.next()  // yields take(SET_GOAL)
+      const result = generator.next(setGoal(GOAL_LINT))
 
-      expect(result.value).to.deep.equal(take(foreman.SET_GOAL))
+      expect(result.value).to.deep.equal(take(SET_GOAL))
     })
 
   })
