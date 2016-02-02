@@ -15,22 +15,13 @@ export const WORKER_TEST_RUNNER = 'ship-yard/workers/WORKER_TEST_RUNNER'
 export const WORKER_TRANSPILER = 'ship-yard/workers/WORKER_TRANSPILER'
 export const WORKER_WATCHER = 'ship-yard/workers/WORKER_WATCHER'
 
-export const WORKERS = {
-  [WORKER_BUNDLER]: {name: 'Bundler'},
-  [WORKER_DEV_SERVER]: {name: 'Dev Server'},
-  [WORKER_LINTER]: {name: 'Linter'},
-  [WORKER_TEST_RUNNER]: {name: 'Test Runner'},
-  [WORKER_TRANSPILER]: {name: 'Transpiler'},
-  [WORKER_WATCHER]: {name: 'Watcher'},
-}
-
 export const initialState = fromJS({
-  [WORKER_BUNDLER]: {error: null, status: OFFLINE},
-  [WORKER_DEV_SERVER]: {error: null, status: OFFLINE},
-  [WORKER_LINTER]: {error: null, status: OFFLINE},
-  [WORKER_TEST_RUNNER]: {error: null, status: OFFLINE},
-  [WORKER_TRANSPILER]: {error: null, status: OFFLINE},
-  [WORKER_WATCHER]: {error: null, status: OFFLINE},
+  [WORKER_BUNDLER]: {error: null, name: 'Bundler', status: OFFLINE},
+  [WORKER_DEV_SERVER]: {error: null, name: 'Dev Server', status: OFFLINE},
+  [WORKER_LINTER]: {error: null, name: 'Linter', status: OFFLINE},
+  [WORKER_TEST_RUNNER]: {error: null, name: 'Test Runner', status: OFFLINE},
+  [WORKER_TRANSPILER]: {error: null, name: 'Transpiler', status: OFFLINE},
+  [WORKER_WATCHER]: {error: null, name: 'Watcher', status: OFFLINE},
 })
 
 function updateStatus(status, state, action) {

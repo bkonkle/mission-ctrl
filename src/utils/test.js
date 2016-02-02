@@ -10,8 +10,8 @@ import thunkMiddleware from 'redux-thunk'
 
 sourceMaps.install()
 
-chai.use(chaiAsPromised)
 chai.use(chaiImmutable)
+chai.use(chaiAsPromised)
 chai.use(sinonChai)
 
 process.send = sinon.spy()

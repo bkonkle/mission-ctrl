@@ -1,7 +1,7 @@
 import 'babel-polyfill'
 import {newStore} from 'state/store'
+import {workerInit, streams} from 'utils/workers'
 import {WORKER_LINTER, WORKER_TRANSPILER, WORKER_WATCHER} from 'state/workers'
-import {workerInit} from 'utils/workers'
 import createLogger from 'utils/logging'
 import initLinter from 'sagas/linter'
 import initTranspiler from 'sagas/transpiler'
@@ -23,6 +23,7 @@ export default function init(worker) {
     default:
       newStore(startForeman)
       log.debug('—— Ship Yard successfully initialized ——')
+      return streams
   }
 }
 

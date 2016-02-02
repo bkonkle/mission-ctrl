@@ -1,4 +1,5 @@
 import {expect} from 'chai'
+import {Writable} from 'stream'
 import {WORKER_TRANSPILER, WORKER_WATCHER, workerReady} from 'state/workers'
 import path from 'path'
 import proxyquire from 'proxyquire'
@@ -67,6 +68,21 @@ describe('utils/workers', () => {
 
       expect(forkStub).to.be.calledWith(workerPath, [workerId, ...process.argv.slice(2), '--color'])
       expect(result).to.equal(worker)
+    })
+
+  })
+
+  describe('streams', () => {
+
+    it('returns a through stream for each worker', () => {
+      const processes = ['watcher', 'transpiler', 'linter', 'test-runner',
+                         'bundler', 'dev-server']
+      expect(workers.streams).to.include.keys(processes)
+      processes.forEach(proc => {
+        const stream = workers.streams.get(proc)
+        expect(stream).to.have.property('readable', true)
+        expect(stream).to.have.property('writable', true)
+      })
     })
 
   })

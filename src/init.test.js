@@ -1,7 +1,8 @@
 import {expect} from 'chai'
+import {streams} from 'utils/workers'
 import {WORKER_LINTER, WORKER_TRANSPILER, WORKER_WATCHER} from 'state/workers'
-import proxyquire from 'proxyquire'
 import initLinter from 'sagas/linter'
+import proxyquire from 'proxyquire'
 import sinon from 'sinon'
 import startForeman from 'sagas/foreman'
 
@@ -21,9 +22,10 @@ describe('init', () => {
 
   describe('init()', () => {
 
-    it('defaults to initializing the foreman state', () => {
-      init()
+    it('defaults to initializing the foreman state and returning the streams', () => {
+      const result = init()
       expect(newStore).to.have.been.calledWith(startForeman)
+      expect(result).to.equal(streams)
     })
 
     it('initializes the watcher', () => {
