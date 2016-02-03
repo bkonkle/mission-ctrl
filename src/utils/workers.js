@@ -14,6 +14,16 @@ import through from 'through2'
 
 const log = createLogger('utils/workers')
 
+export function forkWorker(worker) {
+  const workerPath = path.resolve(
+    path.join(path.dirname(__dirname), 'init.js')
+  )
+  return childProcess.fork(workerPath, [worker, ...process.argv.slice(2), '--color'], {
+    env: {NODE_PATH: `${process.env.NODE_PATH}:${path.dirname(__dirname)}`},
+    silent: true,
+  })
+}
+
 export const workerInit = (worker, saga, storeOverride) => {
   const config = getConfig()
   const store = storeOverride || newStore(saga)
@@ -32,16 +42,6 @@ export const workerInit = (worker, saga, storeOverride) => {
   process.send(workerReady(worker))
 
   log.debug(`—— ${initialState.getIn([worker, 'name'])} successfully initialized ——`)
-}
-
-export function forkWorker(worker) {
-  const workerPath = path.resolve(
-    path.join(path.dirname(__dirname), 'init.js')
-  )
-  return childProcess.fork(workerPath, [worker, ...process.argv.slice(2), '--color'], {
-    env: {NODE_PATH: `${process.env.NODE_PATH}:${path.dirname(__dirname)}`},
-    silent: true,
-  })
 }
 
 export const streams = workers.reduce((memo, worker) => {

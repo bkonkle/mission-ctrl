@@ -23,6 +23,24 @@ describe('utils/workers', () => {
     process.env.NODE_PATH = origPath
   })
 
+  describe('forkWorker()', () => {
+
+    it('calls child_process.fork on the requested worker', () => {
+      const worker = {}
+      const workerId = WORKER_WATCHER
+      const workerPath = path.resolve(
+        path.join(path.dirname(__dirname), 'init.js')
+      )
+      forkStub.returns(worker)
+
+      const result = workers.forkWorker(workerId)
+
+      expect(forkStub).to.be.calledWith(workerPath, [workerId, ...process.argv.slice(2), '--color'])
+      expect(result).to.equal(worker)
+    })
+
+  })
+
   describe('workerInit()', () => {
 
     it('dispatches actions from parent process messages', () => {
@@ -50,24 +68,6 @@ describe('utils/workers', () => {
       const saga = function* mockSaga() {}
       workers.workerInit(WORKER_TRANSPILER, saga)
       expect(process.env.NODE_PATH).to.include(path.resolve('node_modules'))
-    })
-
-  })
-
-  describe('forkWorker()', () => {
-
-    it('calls child_process.fork on the requested worker', () => {
-      const worker = {}
-      const workerId = WORKER_WATCHER
-      const workerPath = path.resolve(
-        path.join(path.dirname(__dirname), 'init.js')
-      )
-      forkStub.returns(worker)
-
-      const result = workers.forkWorker(workerId)
-
-      expect(forkStub).to.be.calledWith(workerPath, [workerId, ...process.argv.slice(2), '--color'])
-      expect(result).to.equal(worker)
     })
 
   })

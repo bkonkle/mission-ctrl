@@ -21,5 +21,7 @@ export default function getConfig(argv) {
     default: {...DEFAULTS, ...config},
   })
 
+  if (options.trace) options.verbose = true
+
   return {...options}
 }

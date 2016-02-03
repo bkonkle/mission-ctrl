@@ -1,4 +1,4 @@
-import {call, fork, join, put, take} from 'redux-saga'
+import {apply, call, fork, join, put, take} from 'redux-saga'
 import {expect} from 'chai'
 import {forkWorker, streams} from 'utils/workers'
 import {GOAL_LINT, GOAL_WATCH, SET_GOAL, setGoal} from 'state/foreman'
@@ -7,6 +7,7 @@ import {DONE, READY, WORKER_LINTER, WORKER_TEST_RUNNER, WORKER_WATCHER,
 import {TASK} from 'redux-saga/lib/utils'
 import {launchWorker, watchProcess, notifyForeman, waitForStatus,
         waitForReady, waitForDone, waitForGoal} from './sagas'
+import {logStream} from 'utils/logging'
 import sinon from 'sinon'
 
 describe('utils/sagas', () => {
@@ -22,10 +23,14 @@ describe('utils/sagas', () => {
       expect(result.value).to.deep.equal(call(forkWorker, WORKER_WATCHER))
     })
 
-    it('connects the stdout of the process to the streams map', () => {
+    it('connects the stdout of the process to the worker through stream', () => {
       const result = generator.next(proc)
-      expect(result.value.CALL.fn).to.have.property('name', 'bound pipe')
-      expect(result.value.CALL.args).to.deep.equal([streams.get('watcher')])
+      expect(result.value).to.deep.equal(apply(proc.stdout, proc.stdout.pipe, streams.get('watcher')))
+    })
+
+    it('connects the log stream of the process to the worker through stream', () => {
+      const result = generator.next()
+      expect(result.value).to.deep.equal(apply(logStream, logStream.pipe, streams.get('watcher')))
     })
 
     it('creates a process watcher', () => {

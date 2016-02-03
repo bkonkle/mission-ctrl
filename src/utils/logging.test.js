@@ -11,8 +11,8 @@ describe('utils/logging', () => {
     './config': getConfigStub,
     'bunyan': {createLogger: createLoggerSpy},
   })
+  const logStream = logging.logStream
   const createLogger = logging.default
-  const PlainStream = logging.PlainStream
 
   const origEnv = process.env.NODE_ENV
 
@@ -24,6 +24,18 @@ describe('utils/logging', () => {
 
   after(() => {
     process.env.NODE_ENV = origEnv
+  })
+
+  describe('logStream', () => {
+
+    it('pushes log messages through the stream')
+
+    it('colors the message yellow if it\'s a warning')
+
+    it('colors the message red if it\'s an error')
+
+    it('prefixes the logger name and pid if verbose is set')
+
   })
 
   describe('createLogger()', () => {
@@ -89,7 +101,7 @@ describe('utils/logging', () => {
       expect(result.streams[0]).to.have.property('level', bunyan.WARN)
     })
 
-    it('uses the PlainStream by default', () => {
+    it('uses the logStream', () => {
       getConfigStub.returns({verbose: false})
 
       createLogger('test-logging')
@@ -100,7 +112,7 @@ describe('utils/logging', () => {
       expect(result).to.have.property('streams')
         .and.have.length(1)
       expect(result.streams[0]).to.have.property('stream')
-        .and.be.an.instanceof(PlainStream)
+        .and.equal(logStream)
     })
 
   })

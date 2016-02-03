@@ -3,44 +3,28 @@ import bunyan from 'bunyan'
 import chalk from 'chalk'
 import getConfig from './config'
 import util from 'util'
+import through from 'through2'
 
-export class PlainStream {
-  constructor(level) {
-    this.level = level
-  }
+export const logStream = through.obj(function log(rec, encoding, callback) {
+  const config = getConfig()
+  let message = rec.msg
 
-  write(rec) {
-    const prefix = message => {
-      if (this.level < bunyan.INFO) {
-
-        let pid = ''
-        const config = getConfig()
-        if (config.trace) {
-          pid = ' ' + chalk.grey(process.pid)
-        }
-
-        return `[${chalk.blue(rec.name)}${pid}] ${message}`
-      }
-      return message
-    }
-
-    if (rec.level < bunyan.INFO) {
-      console.log(prefix(rec.msg))
-    } else if (rec.level < bunyan.WARN) {
-      console.info(prefix(rec.msg))
-    } else if (rec.level < bunyan.ERROR) {
-      if (typeof rec.msg === 'string') {
-        rec.msg = chalk.yellow(rec.msg)
-      }
-      console.warn(prefix(rec.msg))
-    } else {
-      if (typeof rec.msg === 'string') {
-        rec.msg = chalk.red(rec.msg)
-      }
-      console.error(prefix(rec.msg))
+  if (typeof rec.msg === 'string') {
+    if (rec.level === bunyan.WARN) {
+      message = chalk.yellow(rec.msg)
+    } else if (rec.level >= bunyan.ERROR) {
+      message = chalk.red(rec.msg)
     }
   }
-}
+
+  if (config.verbose) {
+    const pid = config.trace ? ' ' + chalk.grey(process.pid) : ''
+    message = `[${chalk.blue(rec.name)}${pid}] ${message}`
+  }
+
+  this.push(message)
+  callback()
+})
 
 /**
  * Create a logger with the given name.
@@ -72,7 +56,7 @@ export default function createLogger(name, level) {
       {
         level: level || loglevel,
         type: 'raw',
-        stream: new PlainStream(level || loglevel),
+        stream: logStream,
       },
     ],
   }

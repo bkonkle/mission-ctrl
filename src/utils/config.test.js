@@ -42,6 +42,12 @@ describe('utils/config', () => {
       expect(result).to.deep.equal(expected)
     })
 
+    it('sets verbose to true if trace is true', () => {
+      const args = ['--trace']
+      const result = getConfig(args)
+      expect(result).to.deep.equal({...expected, trace: true})
+    })
+
   })
 
 })
