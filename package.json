@@ -21,6 +21,7 @@
     "babel-cli": "^6.4.5",
     "babel-core": "^6.4.5",
     "babel-polyfill": "^6.3.14",
+    "blessed": "^0.1.81",
     "bunyan": "^1.5.1",
     "chalk": "^1.1.1",
     "chokidar": "^1.4.2",
@@ -60,6 +61,7 @@
     "proxyquire": "^1.7.3",
     "redux-mock-store": "0.0.6",
     "sinon": "^1.17.2",
-    "sinon-chai": "^2.8.0"
+    "sinon-chai": "^2.8.0",
+    "terminus": "^1.1.0"
   }
 }

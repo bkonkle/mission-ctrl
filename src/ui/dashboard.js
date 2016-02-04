@@ -1,26 +1,10 @@
 import blessed from 'blessed'
 
-export default function getDashboard() {
+export default function newDashboard(menuItems) {
   const dashboard = new blessed.Element()
-
-  const body = new blessed.Box({
-    content: 'Content body.',
-    height: '99%',
-    left: 0,
-    top: 1,
-    width: '100%',
-  })
-
-  const menuItems = {
-    'Linter': () => body.setContent('Linter!!'),
-    'Tests': () => body.setContent('Tests!!'),
-    'Compiler': () => body.setContent('Compiler!!'),
-    'Server': () => body.setContent('Server!!'),
-  }
 
   const menuBar = new blessed.ListBar({
     height: 1,
-    items: menuItems,
     keys: true,
     left: 0,
     style: {
@@ -38,6 +22,13 @@ export default function getDashboard() {
     width: '100%',
   })
 
+  menuBar.setItems(menuItems.map(box => {
+    return () => {
+      dashboard.children = dashboard.children.slice(0, 1)
+      dashboard.append(box)
+    }
+  }).toJS())
+
   menuBar.items.forEach(item => {
     // Remove the prefixes from the item titles
     item.setContent(item._.cmd.text)
@@ -48,7 +39,7 @@ export default function getDashboard() {
   })
 
   dashboard.append(menuBar)
-  dashboard.append(body)
+  dashboard.append(menuItems.first())
 
   return dashboard
 }

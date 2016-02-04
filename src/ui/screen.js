@@ -1,7 +1,9 @@
+import {Map} from 'immutable'
+import {newWorker} from './workers'
 import blessed from 'blessed'
-import getDashboard from './dashboard'
+import newDashboard from './dashboard'
 
-export default function newScreen() {
+export default function newScreen(streams) {
   const screen = new blessed.Screen({
     autoPadding: true,
     debug: true,
@@ -13,7 +15,12 @@ export default function newScreen() {
 
   screen.key(['q', 'C-c'], () => process.exit(0))
 
-  screen.append(getDashboard())
+  const menuItems = new Map({
+    'Transpiler': newWorker(streams.get('transpiler')),
+    'Linter': newWorker(streams.get('linter')),
+    'Watcher': newWorker(streams.get('watcher')),
+  })
+  screen.append(newDashboard(menuItems))
 
   screen.render()
 

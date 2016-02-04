@@ -1,6 +1,5 @@
 #!/usr/bin/env node
-/* eslint-disable no-var */
-var path = require('path')
+const path = require('path')
 
 require('source-map-support').install()
 
@@ -8,4 +7,5 @@ require('app-module-path').addPath(
   path.resolve(path.join(__dirname, '..', 'lib'))
 )
 
-require('init')()
+const streams = require('init')()
+require('ui/screen')(streams)

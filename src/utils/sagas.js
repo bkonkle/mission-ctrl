@@ -13,8 +13,10 @@ export function* launchWorker(worker) {
 
   const proc = yield call(forkWorker, worker)
   const stream = streams.get(slug(name, {lower: true}))
-  yield apply(proc.stdout, proc.stdout.pipe, stream)
-  yield apply(logStream, logStream.pipe, stream)
+  proc.stdout.pipe(stream)
+  logStream.pipe(stream)
+  // yield apply(proc.stdout, proc.stdout.pipe, stream)
+  // yield apply(logStream, logStream.pipe, stream)
 
   const processWatcher = yield call(watchProcess, proc)
   yield fork(notifyForeman, processWatcher)
