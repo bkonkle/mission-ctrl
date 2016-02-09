@@ -2,7 +2,7 @@ import {call, put, take} from 'redux-saga'
 import {CLIEngine} from 'eslint'
 import {done, LINT} from 'state/linter'
 import {expect} from 'chai'
-import {WORKER_LINTER, workerDone} from 'state/workers'
+import {WORKER_LINTER, workerReady} from 'state/workers'
 import initLinter, {getEngine, lint, logReport} from './linter'
 
 describe('sagas/linter', () => {
@@ -25,10 +25,10 @@ describe('sagas/linter', () => {
       expect(result.value).to.deep.equal(put(done()))
     })
 
-    it('sends a worker done message to the foreman', () => {
+    it('sends a worker ready message to the foreman', () => {
       const result = generator.next()
       expect(result.value.CALL.fn).to.have.property('name', 'bound proxy')
-      expect(result.value.CALL.args[0]).to.deep.equal(workerDone(WORKER_LINTER))
+      expect(result.value.CALL.args[0]).to.deep.equal(workerReady(WORKER_LINTER))
     })
 
     it('goes back to waiting for lint events', () => {

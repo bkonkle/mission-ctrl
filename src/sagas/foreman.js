@@ -48,12 +48,12 @@ export function* runLoop() {
     const action = yield take(SOURCE_CHANGED)
     const path = action.payload
     yield put(setGoal(GOAL_TRANSPILE, {path}))
+    yield put(setGoal(GOAL_LINT, {path}))
     yield call(waitForDone, WORKER_TRANSPILER)
     yield put(workerReady(WORKER_TRANSPILER))
-    yield put(setGoal(GOAL_LINT, {path}))
     yield put(setGoal(GOAL_TEST, {path}))
-    yield call(waitForDone, [WORKER_LINTER, WORKER_TEST_RUNNER])
     yield put(setGoal(GOAL_BUNDLE))
     yield call(waitForDone, WORKER_BUNDLER)
+    yield put(workerReady(WORKER_BUNDLER))
   }
 }

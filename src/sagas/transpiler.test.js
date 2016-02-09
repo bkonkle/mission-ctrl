@@ -3,7 +3,7 @@ import {done} from 'state/transpiler'
 import {expect} from 'chai'
 import {sync as glob} from 'glob'
 import {TRANSPILE, transpile as transpileAction} from 'state/transpiler'
-import {workerDone, WORKER_TRANSPILER} from 'state/workers'
+import {WORKER_TRANSPILER, workerReady} from 'state/workers'
 import * as babel from 'utils/babel'
 import initTranspiler, {transpile} from './transpiler'
 
@@ -56,7 +56,7 @@ describe('sagas/transpiler', () => {
     it('sends a workerDone event to the foreman', () => {
       const result = generator.next()
       expect(result.value.CALL.fn).to.have.property('name', 'bound proxy')
-      expect(result.value.CALL.args[0]).to.deep.equal(workerDone(WORKER_TRANSPILER))
+      expect(result.value.CALL.args[0]).to.deep.equal(workerReady(WORKER_TRANSPILER))
     })
 
     it('ends the saga', () => {

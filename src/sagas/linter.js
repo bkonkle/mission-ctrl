@@ -1,7 +1,7 @@
 import {call, put, take} from 'redux-saga'
 import {CLIEngine} from 'eslint'
 import {done, LINT} from 'state/linter'
-import {WORKER_LINTER, workerDone} from 'state/workers'
+import {WORKER_LINTER, workerReady} from 'state/workers'
 import chalk from 'chalk'
 import createLogger from 'utils/logging'
 import getConfig from 'utils/config'
@@ -14,7 +14,7 @@ export default function* initLinter() {
     yield take(LINT)
     yield call(lint)
     yield put(done())
-    yield call(process.send.bind(process), workerDone(WORKER_LINTER))
+    yield call(process.send.bind(process), workerReady(WORKER_LINTER))
   }
 }
 

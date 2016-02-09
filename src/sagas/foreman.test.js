@@ -142,6 +142,11 @@ describe('sagas/foreman', () => {
       )
     })
 
+    it('sets the goal to GOAL_LINT', () => {
+      const result = generator.next()
+      expect(result.value).to.deep.equal(put(setGoal(GOAL_LINT, {path: 'file.js'})))
+    })
+
     it('waits for the transpiler to be DONE', () => {
       const result = generator.next()
       expect(result.value).to.deep.equal(call(waitForDone, WORKER_TRANSPILER))
@@ -152,21 +157,9 @@ describe('sagas/foreman', () => {
       expect(result.value).to.deep.equal(put(workerReady(WORKER_TRANSPILER)))
     })
 
-    it('sets the goal to GOAL_LINT', () => {
-      const result = generator.next()
-      expect(result.value).to.deep.equal(put(setGoal(GOAL_LINT, {path: 'file.js'})))
-    })
-
     it('sets the goal to GOAL_TEST', () => {
       const result = generator.next()
       expect(result.value).to.deep.equal(put(setGoal(GOAL_TEST, {path: 'file.js'})))
-    })
-
-    it('waits for the linter and test runner to be DONE', () => {
-      const result = generator.next()
-      expect(result.value).to.deep.equal(call(
-        waitForDone, [WORKER_LINTER, WORKER_TEST_RUNNER]
-      ))
     })
 
     it('sets the goal to GOAL_BUNDLE', () => {
@@ -177,6 +170,11 @@ describe('sagas/foreman', () => {
     it('waits for the bundler to be DONE', () => {
       const result = generator.next()
       expect(result.value).to.deep.equal(call(waitForDone, WORKER_BUNDLER))
+    })
+
+    it('sets the bundler to READY', () => {
+      const result = generator.next()
+      expect(result.value).to.deep.equal(put(workerReady(WORKER_BUNDLER)))
     })
 
     it('returns to waiting for a source changed event', () => {
