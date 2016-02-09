@@ -2,7 +2,7 @@ import {apply, call, fork, join, put, take} from 'redux-saga'
 import {forkWorker, streams} from 'utils/workers'
 import {SET_GOAL} from 'state/foreman'
 import {DONE, READY, initialState} from 'state/workers'
-import createLogger, {logStream} from 'utils/logging'
+import createLogger from 'utils/logging'
 import slug from 'slug'
 
 const log = createLogger('utils/sagas')
@@ -13,10 +13,8 @@ export function* launchWorker(worker) {
 
   const proc = yield call(forkWorker, worker)
   const stream = streams.get(slug(name, {lower: true}))
-  proc.stdout.pipe(stream)
-  logStream.pipe(stream)
-  // yield apply(proc.stdout, proc.stdout.pipe, stream)
-  // yield apply(logStream, logStream.pipe, stream)
+  yield apply(proc.stdout, proc.stdout.pipe, [stream])
+  yield apply(proc.stderr, proc.stderr.pipe, [stream])
 
   const processWatcher = yield call(watchProcess, proc)
   yield fork(notifyForeman, processWatcher)

@@ -7,13 +7,12 @@ import {DONE, READY, WORKER_LINTER, WORKER_TEST_RUNNER, WORKER_WATCHER,
 import {TASK} from 'redux-saga/lib/utils'
 import {launchWorker, watchProcess, notifyForeman, waitForStatus,
         waitForReady, waitForDone, waitForGoal} from './sagas'
-import {logStream} from 'utils/logging'
 import sinon from 'sinon'
 
 describe('utils/sagas', () => {
 
   describe('launchWorker()', () => {
-    const proc = {stdout: {pipe: () => {}}}
+    const proc = {stdout: {pipe: () => {}}, stderr: {pipe: () => {}}}
     const processWatcher = {}
 
     const generator = launchWorker(WORKER_WATCHER)
@@ -23,14 +22,14 @@ describe('utils/sagas', () => {
       expect(result.value).to.deep.equal(call(forkWorker, WORKER_WATCHER))
     })
 
-    it('connects the stdout of the process to the worker through stream', () => {
+    it('connects the stdout of the process to the worker stream', () => {
       const result = generator.next(proc)
-      expect(result.value).to.deep.equal(apply(proc.stdout, proc.stdout.pipe, streams.get('watcher')))
+      expect(result.value).to.deep.equal(apply(proc.stdout, proc.stdout.pipe, [streams.get('watcher')]))
     })
 
-    it('connects the log stream of the process to the worker through stream', () => {
-      const result = generator.next()
-      expect(result.value).to.deep.equal(apply(logStream, logStream.pipe, streams.get('watcher')))
+    it('connects the stderr of the process to the worker stream', () => {
+      const result = generator.next(proc)
+      expect(result.value).to.deep.equal(apply(proc.stderr, proc.stderr.pipe, [streams.get('watcher')]))
     })
 
     it('creates a process watcher', () => {

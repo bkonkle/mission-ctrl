@@ -1,11 +1,9 @@
 #!/usr/bin/env node
 const path = require('path')
 
-require('source-map-support').install()
-
 require('app-module-path').addPath(
   path.resolve(path.join(__dirname, '..', 'lib'))
 )
 
-const streams = require('init')()
-require('ui/screen')(streams)
+require('init')()
+require('ui/screen')()

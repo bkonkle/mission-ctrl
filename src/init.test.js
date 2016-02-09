@@ -22,10 +22,9 @@ describe('init', () => {
 
   describe('init()', () => {
 
-    it('defaults to initializing the foreman state and returning the streams', () => {
-      const result = init()
+    it('defaults to initializing the foreman state', () => {
+      init()
       expect(newStore).to.have.been.calledWith(startForeman)
-      expect(result).to.equal(streams)
     })
 
     it('initializes the watcher', () => {

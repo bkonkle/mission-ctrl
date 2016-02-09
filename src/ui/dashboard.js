@@ -26,6 +26,7 @@ export default function newDashboard(menuItems) {
     return () => {
       dashboard.children = dashboard.children.slice(0, 1)
       dashboard.append(box)
+      box.focus()
     }
   }).toJS())
 
@@ -34,8 +35,8 @@ export default function newDashboard(menuItems) {
     item.setContent(item._.cmd.text)
   })
 
-  menuBar.on('attach', () => {
-    menuBar.focus()
+  dashboard.on('attach', () => {
+    dashboard.children[1].focus()
   })
 
   dashboard.append(menuBar)
