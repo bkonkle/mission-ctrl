@@ -19,7 +19,7 @@ describe('utils/babel', () => {
   const babel = proxyquire('./babel', {
     'babel-core': {transformFileSync: transformStub},
     'fs': {chmodSync: chmodSpy, readFileSync: readFileStub, statSync: statStub},
-    'utils/fs': {outputToMemFs: outputSpy},
+    'utils/fs': {outputToTempDir: outputSpy},
   })
 
   beforeEach(() => {

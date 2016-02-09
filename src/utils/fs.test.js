@@ -1,34 +1,36 @@
 import {expect} from 'chai'
-import {memfs, outputToMemFs} from './fs'
+import {tempDir, outputToTempDir} from './fs'
+import fs from 'fs'
+import path from 'path'
 
 describe('utils/fs', () => {
 
-  describe('outputToMemFs()', () => {
+  describe('outputToTempDir()', () => {
 
-    it('saves the requested file to the virtual filesystem', () => {
+    it('saves the requested file to the auto-generated temporary directory', () => {
       const code = 'export const test = \'test\''
-      outputToMemFs('/test.js', code)
+      outputToTempDir('/test.js', code)
 
-      const stat = memfs.statSync('/test.js')
+      const stat = fs.statSync(path.join(tempDir, 'test.js'))
       expect(stat.isDirectory()).to.be.false
       expect(stat.isFile()).to.be.true
 
-      expect(memfs.readFileSync('/test.js').toString()).to.equal(code)
+      expect(fs.readFileSync(path.join(tempDir, 'test.js')).toString()).to.equal(code)
     })
 
     it('creates intermediate directories as needed', () => {
       const code = 'export const test = \'test\''
-      outputToMemFs('/reach/for/the/sky.js', code)
+      outputToTempDir('/reach/for/the/sky.js', code)
 
-      let stat = memfs.statSync('/reach/for')
+      let stat = fs.statSync(path.join(tempDir, '/reach/for'))
       expect(stat.isDirectory()).to.be.true
       expect(stat.isFile()).to.be.false
 
-      stat = memfs.statSync('/reach/for/the/sky.js')
+      stat = fs.statSync(path.join(tempDir, '/reach/for/the/sky.js'))
       expect(stat.isDirectory()).to.be.false
       expect(stat.isFile()).to.be.true
 
-      expect(memfs.readFileSync('/reach/for/the/sky.js').toString()).to.equal(code)
+      expect(fs.readFileSync(path.join(tempDir, '/reach/for/the/sky.js')).toString()).to.equal(code)
     })
 
   })

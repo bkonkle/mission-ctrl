@@ -1,4 +1,4 @@
-import {call, put, take} from 'redux-saga'
+import {apply, call, put, take} from 'redux-saga'
 import {CLIEngine} from 'eslint'
 import {done, LINT} from 'state/linter'
 import {expect} from 'chai'
@@ -16,7 +16,7 @@ describe('sagas/linter', () => {
     })
 
     it('calls the linter', () => {
-      const result = generator.next(lint)
+      const result = generator.next()
       expect(result.value).to.deep.equal(call(lint))
     })
 
@@ -27,8 +27,7 @@ describe('sagas/linter', () => {
 
     it('sends a worker ready message to the foreman', () => {
       const result = generator.next()
-      expect(result.value.CALL.fn).to.have.property('name', 'bound proxy')
-      expect(result.value.CALL.args[0]).to.deep.equal(workerReady(WORKER_LINTER))
+      expect(result.value).to.deep.equal(apply(process, process.send, workerReady(WORKER_LINTER)))
     })
 
     it('goes back to waiting for lint events', () => {
@@ -59,8 +58,7 @@ describe('sagas/linter', () => {
 
     it('calls the linter on the source', () => {
       const result = generator.next(linter)
-      expect(result.value.CALL.fn).to.have.property('name', 'bound executeOnFiles')
-      expect(result.value.CALL.args[0]).to.deep.equal(['src'])
+      expect(result.value).to.deep.equal(apply(linter, linter.executeOnFiles, ['src']))
     })
 
     it('calls logReport if there were results', () => {

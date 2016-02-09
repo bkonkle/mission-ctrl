@@ -1,4 +1,4 @@
-import {call} from 'redux-saga'
+import {apply, call} from 'redux-saga'
 import {expect} from 'chai'
 import {sourceChanged} from 'state/foreman'
 import chalk from 'chalk'
@@ -56,8 +56,7 @@ describe('workers/watcher', () => {
 
     it('sends a CHANGE event to the foreman', () => {
       const result = generator.next()
-      expect(result.value.CALL.fn).have.property('name', 'bound proxy')
-      expect(result.value.CALL.args[0]).to.deep.equal(sourceChanged(file))
+      expect(result.value).to.deep.equal(apply(process, process.send, sourceChanged(file)))
     })
 
   })

@@ -1,4 +1,4 @@
-import {call} from 'redux-saga'
+import {apply, call} from 'redux-saga'
 import {sourceChanged} from 'state/foreman'
 import chalk from 'chalk'
 import chokidar from 'chokidar'
@@ -27,5 +27,5 @@ export function* watch() {
 
 export function* reportChange(event, file, info = log.info.bind(log)) {
   yield call(info, `${chalk.yellow(event)} --> ${file}`)
-  yield call(process.send.bind(process), sourceChanged(file))
+  yield apply(process, process.send, sourceChanged(file))
 }

@@ -1,4 +1,4 @@
-import {call, put, take} from 'redux-saga'
+import {apply, call, put, take} from 'redux-saga'
 import {CLIEngine} from 'eslint'
 import {done, LINT} from 'state/linter'
 import {WORKER_LINTER, workerReady} from 'state/workers'
@@ -14,7 +14,7 @@ export default function* initLinter() {
     yield take(LINT)
     yield call(lint)
     yield put(done())
-    yield call(process.send.bind(process), workerReady(WORKER_LINTER))
+    yield apply(process, process.send, workerReady(WORKER_LINTER))
   }
 }
 
@@ -26,7 +26,7 @@ export function* lint() {
   const config = getConfig()
 
   const linter = yield call(getEngine)
-  const report = yield call(linter.executeOnFiles.bind(linter), [config.source])
+  const report = yield apply(linter, linter.executeOnFiles, [config.source])
   if (report && report.results) yield call(logReport, report)
 
   log.info('—— Linting complete ——')

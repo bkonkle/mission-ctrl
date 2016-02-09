@@ -1,4 +1,4 @@
-import {call, put, take} from 'redux-saga'
+import {apply, call, put, take} from 'redux-saga'
 import {done} from 'state/transpiler'
 import {expect} from 'chai'
 import {sync as glob} from 'glob'
@@ -55,8 +55,7 @@ describe('sagas/transpiler', () => {
 
     it('sends a workerDone event to the foreman', () => {
       const result = generator.next()
-      expect(result.value.CALL.fn).to.have.property('name', 'bound proxy')
-      expect(result.value.CALL.args[0]).to.deep.equal(workerReady(WORKER_TRANSPILER))
+      expect(result.value).to.deep.equal(apply(process, process.send, workerReady(WORKER_TRANSPILER)))
     })
 
     it('ends the saga', () => {

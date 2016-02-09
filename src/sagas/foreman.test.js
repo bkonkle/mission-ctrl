@@ -1,10 +1,11 @@
-import {call, fork, put, take} from 'redux-saga'
+import {apply, call, fork, put, take} from 'redux-saga'
 import {expect} from 'chai'
 import {GOAL_BUNDLE, GOAL_LINT, GOAL_TEST, GOAL_TRANSPILE, GOAL_WATCH,
         SOURCE_CHANGED, setGoal, sourceChanged} from 'state/foreman'
 import {launchWorker, waitForReady, waitForDone, waitForGoal} from 'utils/sagas'
 import {lint} from 'state/linter'
 import {transpile} from 'state/transpiler'
+import {runTests} from 'state/test-runner'
 import {WORKER_BUNDLER, WORKER_LINTER, WORKER_TEST_RUNNER, WORKER_TRANSPILER,
         WORKER_WATCHER, workerReady} from 'state/workers'
 import * as foreman from './foreman'
@@ -48,7 +49,7 @@ describe('sagas/foreman', () => {
 
   })
 
-  describe('startWatcher', () => {
+  describe('startWatcher()', () => {
     const generator = foreman.startWatcher()
 
     it('launches the watcher process', () => {
@@ -63,7 +64,7 @@ describe('sagas/foreman', () => {
 
   })
 
-  describe('startTranspiler', () => {
+  describe('startTranspiler()', () => {
     const transpiler = {send: () => {}}
     const generator = foreman.startTranspiler()
 
@@ -84,8 +85,7 @@ describe('sagas/foreman', () => {
 
     it('sends TRANSPILE events to the worker', () => {
       const result = generator.next()
-      expect(result.value.CALL.fn).have.property('name', 'bound send')
-      expect(result.value.CALL.args[0]).to.deep.equal(transpile())
+      expect(result.value).to.deep.equal(apply(transpiler, transpiler.send, transpile()))
     })
 
     it('goes back to waiting for GOAL_TRANSPILE events', () => {
@@ -95,7 +95,7 @@ describe('sagas/foreman', () => {
 
   })
 
-  describe('startLinter', () => {
+  describe('startLinter()', () => {
     const linter = {send: () => {}}
     const generator = foreman.startLinter()
 
@@ -116,13 +116,43 @@ describe('sagas/foreman', () => {
 
     it('sends LINT events to the worker', () => {
       const result = generator.next()
-      expect(result.value.CALL.fn).have.property('name', 'bound send')
-      expect(result.value.CALL.args[0]).to.deep.equal(lint())
+      expect(result.value).to.deep.equal(apply(linter, linter.send, lint()))
     })
 
     it('goes back to waiting for GOAL_LINT events', () => {
       const result = generator.next()
       expect(result.value).to.deep.equal(call(waitForGoal, GOAL_LINT))
+    })
+
+  })
+
+  describe('startTestRunner()', () => {
+    const testRunner = {send: () => {}}
+    const generator = foreman.startTestRunner()
+
+    it('launches the test runner process', () => {
+      const result = generator.next()
+      expect(result.value).to.deep.equal(call(launchWorker, WORKER_TEST_RUNNER))
+    })
+
+    it('waits for it to be ready', () => {
+      const result = generator.next(testRunner)
+      expect(result.value).to.deep.equal(call(waitForReady, WORKER_TEST_RUNNER))
+    })
+
+    it('waits for GOAL_TEST events', () => {
+      const result = generator.next(workerReady(WORKER_TEST_RUNNER))
+      expect(result.value).to.deep.equal(call(waitForGoal, GOAL_TEST))
+    })
+
+    it('sends TEST events to the worker', () => {
+      const result = generator.next()
+      expect(result.value).to.deep.equal(apply(testRunner, testRunner.send, runTests()))
+    })
+
+    it('goes back to waiting for GOAL_TEST events', () => {
+      const result = generator.next()
+      expect(result.value).to.deep.equal(call(waitForGoal, GOAL_TEST))
     })
 
   })

@@ -1,4 +1,4 @@
-import {outputToMemFs} from 'utils/fs'
+import {outputToTempDir} from 'utils/fs'
 import {transformFileSync} from 'babel-core'
 import createLogger from 'utils/logging'
 import path from 'path'
@@ -35,12 +35,12 @@ export function transpile({baseDir, copyFiles = false, outDir, filenames}) {
     // Output source map
     const mapLoc = dest + '.map'
     data.code = addSourceMappingUrl(data.code, mapLoc)
-    outputToMemFs(mapLoc, JSON.stringify(data.map))
+    outputToTempDir(mapLoc, JSON.stringify(data.map))
     // The code below will be needed when production builds are enabled
     // fs.chmodSync(mapLoc, mode)
 
     // Output transpiled file
-    outputToMemFs(dest, data.code)
+    outputToTempDir(dest, data.code)
     // The code below will be needed when production builds are enabled
     // fs.chmodSync(dest, mode)
 

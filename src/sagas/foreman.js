@@ -1,7 +1,8 @@
-import {call, fork, put, take} from 'redux-saga'
+import {apply, call, fork, put, take} from 'redux-saga'
 import {launchWorker, waitForReady, waitForDone, waitForGoal} from 'utils/sagas'
 import {lint} from 'state/linter'
 import {transpile} from 'state/transpiler'
+import {runTests} from 'state/test-runner'
 import {GOAL_BUNDLE, GOAL_LINT, GOAL_TEST, GOAL_TRANSPILE, GOAL_WATCH,
         SOURCE_CHANGED, setGoal, sourceChanged} from 'state/foreman'
 import {WORKER_BUNDLER, WORKER_LINTER, WORKER_TEST_RUNNER, WORKER_TRANSPILER,
@@ -29,7 +30,7 @@ export function* startTranspiler() {
   yield call(waitForReady, WORKER_TRANSPILER)
   while (true) {
     yield call(waitForGoal, GOAL_TRANSPILE)
-    yield call(transpiler.send.bind(transpiler), transpile())
+    yield apply(transpiler, transpiler.send, transpile())
   }
 }
 
@@ -38,7 +39,16 @@ export function* startLinter() {
   yield call(waitForReady, WORKER_LINTER)
   while (true) {
     yield call(waitForGoal, GOAL_LINT)
-    yield call(linter.send.bind(linter), lint())
+    yield apply(linter, linter.send, lint())
+  }
+}
+
+export function* startTestRunner() {
+  const transpiler = yield call(launchWorker, WORKER_TEST_RUNNER)
+  yield call(waitForReady, WORKER_TEST_RUNNER)
+  while (true) {
+    yield call(waitForGoal, GOAL_TEST)
+    yield apply(transpiler, transpiler.send, runTests())
   }
 }
 

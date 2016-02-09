@@ -1,5 +1,4 @@
 import {expect} from 'chai'
-import {Writable} from 'stream'
 import {WORKER_TRANSPILER, WORKER_WATCHER, workerReady} from 'state/workers'
 import path from 'path'
 import proxyquire from 'proxyquire'
@@ -13,6 +12,11 @@ describe('utils/workers', () => {
     'child_process': {fork: forkStub},
   })
 
+  before(() => {
+    sinon.spy(process, 'on')
+    sinon.spy(process, 'send')
+  })
+
   beforeEach(() => {
     forkStub.reset()
     process.on.reset()
@@ -21,6 +25,11 @@ describe('utils/workers', () => {
 
   afterEach(() => {
     process.env.NODE_PATH = origPath
+  })
+
+  after(() => {
+    process.on.restore()
+    process.send.restore()
   })
 
   describe('forkWorker()', () => {

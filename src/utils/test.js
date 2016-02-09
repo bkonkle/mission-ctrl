@@ -4,7 +4,6 @@ import chaiAsPromised from 'chai-as-promised'
 import chaiImmutable from 'chai-immutable'
 import configureStore from 'redux-mock-store'
 import sourceMaps from 'source-map-support'
-import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
 import thunkMiddleware from 'redux-thunk'
 
@@ -14,8 +13,7 @@ chai.use(chaiImmutable)
 chai.use(chaiAsPromised)
 chai.use(sinonChai)
 
-process.send = sinon.spy()
-process.on = sinon.spy()
+if (!process.send) process.send = () => {}
 
 export function mockStore(...args) {
   return configureStore([thunkMiddleware])(...args)
