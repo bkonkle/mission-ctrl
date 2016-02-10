@@ -8,6 +8,7 @@ export function newWorker(stream) {
     height: '99%',
     keys: true,
     left: 0,
+    mouse: true,
     scrollbar: {
       fg: '#87CEFA',
       ch: '|',

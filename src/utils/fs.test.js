@@ -1,36 +1,44 @@
 import {expect} from 'chai'
-import {tempDir, outputToTempDir} from './fs'
+import {tempDir, outputTo, tmp} from './fs'
 import fs from 'fs'
-import path from 'path'
 
 describe('utils/fs', () => {
 
-  describe('outputToTempDir()', () => {
+  describe('outputToDir()', () => {
 
-    it('saves the requested file to the auto-generated temporary directory', () => {
+    it('saves the requested file to given destination', () => {
       const code = 'export const test = \'test\''
-      outputToTempDir('/test.js', code)
+      outputTo(tmp('/test.js'), code)
 
-      const stat = fs.statSync(path.join(tempDir, 'test.js'))
+      const stat = fs.statSync(tmp('/test.js'))
       expect(stat.isDirectory()).to.be.false
       expect(stat.isFile()).to.be.true
 
-      expect(fs.readFileSync(path.join(tempDir, 'test.js')).toString()).to.equal(code)
+      expect(fs.readFileSync(tmp('/test.js')).toString()).to.equal(code)
     })
 
     it('creates intermediate directories as needed', () => {
       const code = 'export const test = \'test\''
-      outputToTempDir('/reach/for/the/sky.js', code)
+      outputTo(tmp('/reach/for/the/sky.js'), code)
 
-      let stat = fs.statSync(path.join(tempDir, '/reach/for'))
+      let stat = fs.statSync(tmp('/reach/for'))
       expect(stat.isDirectory()).to.be.true
       expect(stat.isFile()).to.be.false
 
-      stat = fs.statSync(path.join(tempDir, '/reach/for/the/sky.js'))
+      stat = fs.statSync(tmp('/reach/for/the/sky.js'))
       expect(stat.isDirectory()).to.be.false
       expect(stat.isFile()).to.be.true
 
-      expect(fs.readFileSync(path.join(tempDir, '/reach/for/the/sky.js')).toString()).to.equal(code)
+      expect(fs.readFileSync(tmp('/reach/for/the/sky.js')).toString()).to.equal(code)
+    })
+
+  })
+
+  describe('tmp', () => {
+
+    it('prefixes the given path with the tempDir', () => {
+      const result = tmp('/path/to/test/file.js')
+      expect(result).to.equal(`${tempDir}/path/to/test/file.js`)
     })
 
   })

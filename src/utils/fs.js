@@ -8,8 +8,12 @@ import uuid from 'uuid'
 export const tempDir = path.join(tmpdir(), `ship-yard-${uuid.v4()}`)
 process.on('exit', () => rimraf(tempDir))
 
-export function outputToTempDir(filePath, data) {
-  const createdDirPath = mkdirp(path.join(tempDir, path.dirname(filePath)))
-  fs.writeFileSync(path.join(tempDir, filePath), data)
+export function outputTo(filePath, data) {
+  const createdDirPath = mkdirp(path.dirname(filePath))
+  fs.writeFileSync(filePath, data)
   return createdDirPath
+}
+
+export function tmp(filePath) {
+  return path.join(tempDir, filePath)
 }

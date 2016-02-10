@@ -3,6 +3,9 @@
   "version": "1.0.0-dev.1",
   "description": "A build and execution environment for React/Redux apps",
   "main": "lib/index.js",
+  "bin": {
+    "ship": "./bin/ship"
+  },
   "repository": {
     "type": "git",
     "url": "git@github.com:ecliptic/ship-yard.git"

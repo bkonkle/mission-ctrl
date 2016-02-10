@@ -1,11 +1,13 @@
 import {expect} from 'chai'
+import {tmp} from 'utils/fs'
 import path from 'path'
 import proxyquire from 'proxyquire'
 import sinon from 'sinon'
 
 describe('utils/babel', () => {
-  const dest = '/code/my-project/build/file.js'
-  const filenames = ['/code/my-project/src/file.js', '/code/my-project/src/test/file.test.js']
+  const src = '/code/my-project/src/file.js'
+  const dest = tmp('/code/my-project/build/file.js')
+  const filenames = [src, '/code/my-project/src/test/file.test.js']
   const options = {baseDir: '/code/my-project/src', filenames, outDir: '/code/my-project/build'}
   const codeEs6 = 'const CODE = "CODE"'
   const codeEs5 = 'var CODE = "CODE"'
@@ -19,7 +21,7 @@ describe('utils/babel', () => {
   const babel = proxyquire('./babel', {
     'babel-core': {transformFileSync: transformStub},
     'fs': {chmodSync: chmodSpy, readFileSync: readFileStub, statSync: statStub},
-    'utils/fs': {outputToTempDir: outputSpy},
+    'utils/fs': {outputTo: outputSpy},
   })
 
   beforeEach(() => {
@@ -38,8 +40,8 @@ describe('utils/babel', () => {
       expect(transformStub).to.have.been.calledTwice
 
       const args = transformStub.firstCall.args
-      expect(args[0]).to.equal('/code/my-project/src/file.js')
-      expect(args[1]).to.have.property('sourceFileName', '../src/file.js')
+      expect(args[0]).to.equal(src)
+      expect(args[1]).to.have.property('sourceFileName', path.relative(path.dirname(dest), src))
       expect(args[1]).to.have.property('sourceMapTarget', 'file.js')
     })
 
@@ -51,6 +53,9 @@ describe('utils/babel', () => {
     })
 
     it('prepends a forward slash to the destination if needed', () => {
+      const source = path.resolve('src/test/file.test.js')
+      const expected = tmp(source.replace('src/test', 'build/test'))
+
       babel.transpile({
         baseDir: 'src',
         filenames: [path.resolve('src/file.js'), path.resolve('src/test/file.test.js')],
@@ -60,8 +65,8 @@ describe('utils/babel', () => {
       expect(transformStub).to.have.been.calledTwice
 
       const args = transformStub.secondCall.args
-      expect(args[0]).to.equal(path.resolve('src/test/file.test.js'))
-      expect(args[1]).to.have.property('sourceFileName', '../../src/test/file.test.js')
+      expect(args[0]).to.equal(source)
+      expect(args[1]).to.have.property('sourceFileName', path.relative(path.dirname(expected), source))
       expect(args[1]).to.have.property('sourceMapTarget', 'file.test.js')
     })
 

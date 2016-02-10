@@ -1,17 +1,15 @@
 import 'babel-polyfill'
 import {initialState as workers, workerReady} from 'state/workers'
+import {logStream} from 'utils/logging'
 import {Map} from 'immutable'
 import {newStore} from 'state/store'
 import childProcess from 'child_process'
-import createLogger, {logStream} from 'utils/logging'
 import findup from 'findup-sync'
 import getConfig from 'utils/config'
 import Module from 'module'
 import path from 'path'
 import slug from 'slug'
 import through from 'through2'
-
-const log = createLogger('utils/workers')
 
 export function forkWorker(worker) {
   const workerPath = path.resolve(
@@ -30,8 +28,6 @@ export const streams = workers.reduce((memo, worker) => {
 export const workerInit = (workerKey, saga, storeOverride) => {
   const config = getConfig()
   const store = storeOverride || newStore(saga)
-  const worker = workers.get(workerKey)
-  const name = worker.get('name')
 
   const nodeModules = findup('node_modules', {cwd: path.resolve(config.source)})
   if (nodeModules) {
@@ -41,12 +37,7 @@ export const workerInit = (workerKey, saga, storeOverride) => {
 
   logStream.pipe(process.stdout)
 
-  process.on('message', message => {
-    log.debug(`Message received for the ${name}: ${message.type}`)
-    store.dispatch(message)
-  })
+  process.on('message', message => store.dispatch(message))
 
   process.send(workerReady(workerKey))
-
-  log.debug(`—— ${name} successfully initialized ——`)
 }
