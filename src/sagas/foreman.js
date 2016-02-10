@@ -45,11 +45,11 @@ export function* startLinter() {
 }
 
 export function* startTestRunner() {
-  const transpiler = yield call(launchWorker, WORKER_TEST_RUNNER)
+  const testRunner = yield call(launchWorker, WORKER_TEST_RUNNER)
   yield call(waitForReady, WORKER_TEST_RUNNER)
   while (true) {
     yield call(waitForGoal, GOAL_TEST)
-    yield apply(transpiler, transpiler.send, [runTests()])
+    yield apply(testRunner, testRunner.send, [runTests()])
   }
 }
 
