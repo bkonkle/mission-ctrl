@@ -1,12 +1,15 @@
 import {apply, call, put, take} from 'redux-saga'
 import {expect} from 'chai'
 import {sync as glob} from 'glob'
-import {tmp} from 'utils/fs'
+import {sync as mkdirp} from 'mkdirp'
 import {TEST, done} from 'state/test-runner'
+import {tmp} from 'utils/fs'
 import {WORKER_TEST_RUNNER, workerReady} from 'state/workers'
 import chalk from 'chalk'
+import fs from 'fs'
 import initTestRunner, {clearCache, runTests, logResults} from './test-runner'
 import path from 'path'
+import reqFrom from 'req-from'
 
 describe('sagas/test-runner', () => {
 
@@ -43,6 +46,16 @@ describe('sagas/test-runner', () => {
   describe('runTests()', () => {
     const mocha = {files: [], run: () => {}}
     const generator = runTests({dest: 'test', glob: '*'}, mocha)
+
+    before(() => {
+      mkdirp(tmp('test/utils'))
+      fs.writeFileSync(tmp('test/utils/test-setup.js'), '{}')
+    })
+
+    it('imports the test setup if it exists', () => {
+      const result = generator.next()
+      expect(result.value).to.deep.equal(call(reqFrom, tmp('test'), './utils/test-setup'))
+    })
 
     it('gets the filenames to test from the temp directory', () => {
       const result = generator.next()

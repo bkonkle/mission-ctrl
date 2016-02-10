@@ -1,12 +1,11 @@
 import {expect} from 'chai'
-import {tmp} from 'utils/fs'
 import path from 'path'
 import proxyquire from 'proxyquire'
 import sinon from 'sinon'
 
 describe('utils/babel', () => {
   const src = '/code/my-project/src/file.js'
-  const dest = tmp('/code/my-project/build/file.js')
+  const dest = '/code/my-project/build/file.js'
   const filenames = [src, '/code/my-project/src/test/file.test.js']
   const options = {baseDir: '/code/my-project/src', filenames, outDir: '/code/my-project/build'}
   const codeEs6 = 'const CODE = "CODE"'
@@ -54,7 +53,7 @@ describe('utils/babel', () => {
 
     it('prepends a forward slash to the destination if needed', () => {
       const source = path.resolve('src/test/file.test.js')
-      const expected = tmp(source.replace('src/test', 'build/test'))
+      const expected = source.replace('src/test', 'build/test')
 
       babel.transpile({
         baseDir: 'src',

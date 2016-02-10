@@ -1,5 +1,4 @@
 import {expect} from 'chai'
-import {tempDir} from 'utils/fs'
 import {WORKER_TRANSPILER, WORKER_WATCHER, workerReady} from 'state/workers'
 import path from 'path'
 import proxyquire from 'proxyquire'
@@ -38,18 +37,20 @@ describe('utils/workers', () => {
     it('calls child_process.fork on the requested worker', () => {
       const worker = {}
       const workerId = WORKER_WATCHER
+      const config = {tmpDir: '/tmp/ship-yard-test'}
       const args = [
         workerId,
         ...process.argv.slice(2),
         '--color',
-        `--tmpDir ${tempDir}`,
+        '--tmpDir',
+        config.tmpDir,
       ]
       const workerPath = path.resolve(
         path.join(path.dirname(__dirname), 'init.js')
       )
       forkStub.returns(worker)
 
-      const result = workers.forkWorker(workerId)
+      const result = workers.forkWorker(workerId, config)
 
       expect(forkStub).to.be.calledWith(workerPath, args)
       expect(result).to.equal(worker)

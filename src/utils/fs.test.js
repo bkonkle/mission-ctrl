@@ -36,7 +36,7 @@ describe('utils/fs', () => {
 
   describe('tmp', () => {
 
-    it('prefixes the given path with the tempDir', () => {
+    it('prefixes the given path with the temp directory', () => {
       const config = {tmpDir: '/test'}
       const result = tmp('/path/to/test/file.js', config)
       expect(result).to.equal('/test/path/to/test/file.js')

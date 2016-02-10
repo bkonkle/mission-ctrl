@@ -9,6 +9,7 @@ export default function init() {
     autoPadding: true,
     debug: true,
     dockBorders: true,
+    fullUnicode: true,
     smartCSR: true,
     terminal: 'xterm-256color',
     title: 'control-center',
@@ -17,11 +18,11 @@ export default function init() {
   screen.key(['q', 'C-c'], () => process.exit(0))
 
   const menuItems = new Map({
-    'Foreman': newWorker(streams.get('foreman')),
-    'Watcher': newWorker(streams.get('watcher')),
     'Transpiler': newWorker(streams.get('transpiler')),
     'Linter': newWorker(streams.get('linter')),
     'Tests': newWorker(streams.get('test-runner')),
+    'Foreman': newWorker(streams.get('foreman')),
+    'Watcher': newWorker(streams.get('watcher')),
   })
 
   screen.append(newDashboard(menuItems))

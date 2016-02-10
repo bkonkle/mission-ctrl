@@ -3,7 +3,6 @@ import {initialState as workers, workerReady} from 'state/workers'
 import {logStream} from 'utils/logging'
 import {Map} from 'immutable'
 import {newStore} from 'state/store'
-import {tempDir} from 'utils/fs'
 import childProcess from 'child_process'
 import findup from 'findup-sync'
 import getConfig from 'utils/config'
@@ -12,12 +11,15 @@ import path from 'path'
 import slug from 'slug'
 import through from 'through2'
 
-export function forkWorker(worker) {
+export function forkWorker(worker, configOverride) {
+  const config = configOverride || getConfig()
+
   const args = [
     worker,
     ...process.argv.slice(2),
     '--color',
-    `--tmpDir ${tempDir}`,
+    '--tmpDir',
+    config.tmpDir,
   ]
   const workerPath = path.resolve(
     path.join(path.dirname(__dirname), 'init.js')

@@ -5,13 +5,14 @@ import {tmp} from 'utils/fs'
 import {WORKER_TEST_RUNNER, workerReady} from 'state/workers'
 import chalk from 'chalk'
 import createLogger from 'utils/logging'
+import fs from 'fs'
 import getConfig from 'utils/config'
 import Mocha from 'mocha'
 import path from 'path'
 import plur from 'plur'
+import reqFrom from 'req-from'
 
 const log = createLogger('sagas/test-runner')
-const mocha = new Mocha({reporter: 'dot'})
 
 export default function* initTestRunner() {
   log.debug('—— Test runner listening ——')
@@ -25,10 +26,20 @@ export default function* initTestRunner() {
 
 export function* runTests(configOverride, mochaOverride) {
   const config = configOverride || getConfig()
-  const runner = mochaOverride || mocha
-  runner.files = yield call(glob, tmp(path.join(config.dest, config.glob)))
+  const mocha = mochaOverride || new Mocha({
+    reporter: 'dot',
+    useColors: true,
+  })
 
-  yield apply(runner, runner.run, [logResults])
+  if (fs.existsSync(path.join(tmp(config.dest), 'utils', 'test-setup.js'))) {
+    yield call(reqFrom, tmp(config.dest), './utils/test-setup')
+  }
+
+  mocha.files = yield call(glob, tmp(path.join(config.dest, config.glob)))
+
+  log.debug(`Running tests in ${tmp(path.join(config.dest, config.glob))}`)
+
+  yield apply(mocha, mocha.run, [logResults])
 
   log.info('—— Test runner complete ——')
   return call(clearCache)

@@ -1,7 +1,9 @@
-import {outputTo, tmp} from 'utils/fs'
+import {outputTo} from 'utils/fs'
 import {transformFileSync} from 'babel-core'
+import chalk from 'chalk'
 import createLogger from 'utils/logging'
 import fs from 'fs'
+import getConfig from 'utils/config'
 import path from 'path'
 
 const log = createLogger('utils/babel')
@@ -16,8 +18,7 @@ const log = createLogger('utils/babel')
  * @param {Array} options.filenames - an array of filenames to transform
  */
 export function transpile({baseDir, copyFiles = false, outDir, filenames}) {
-  log.info('—— Transpile starting ——')
-  log.debug('Destination:', tmp(outDir))
+  const config = getConfig()
 
   filenames.forEach(filename => {
     // remove extension and then append back on .js
@@ -25,7 +26,7 @@ export function transpile({baseDir, copyFiles = false, outDir, filenames}) {
       path.resolve(baseDir),
       filename.replace(/\.(\w*?)$/, '') + '.js'
     )
-    const dest = tmp(path.resolve(path.join(outDir, relative)))
+    const dest = path.resolve(path.join(outDir, relative))
 
     const data = transformFileSync(filename, {
       sourceMaps: true,
@@ -46,7 +47,7 @@ export function transpile({baseDir, copyFiles = false, outDir, filenames}) {
     outputTo(dest, data.code)
     fs.chmodSync(dest, mode)
 
-    log.info(filename + ' --> ' + path.join(outDir, relative))
+    log.info(`${filename} ${chalk.blue('-->')} ${chalk.green(path.join(config.dest, relative))}`)
   })
 }
 

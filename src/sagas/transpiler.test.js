@@ -2,6 +2,7 @@ import {apply, call, put, take} from 'redux-saga'
 import {done} from 'state/transpiler'
 import {expect} from 'chai'
 import {sync as glob} from 'glob'
+import {tmp} from 'utils/fs'
 import {TRANSPILE, transpile as transpileAction} from 'state/transpiler'
 import {WORKER_TRANSPILER, workerDone} from 'state/workers'
 import * as babel from 'utils/babel'
@@ -43,7 +44,7 @@ describe('sagas/transpiler', () => {
       expect(result.value).to.deep.equal(call(babel.transpile, {
         baseDir: 'src',
         filenames,
-        outDir: 'build',
+        outDir: tmp('build'),
         sourceMaps: true,
       }))
     })
