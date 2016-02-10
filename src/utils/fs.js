@@ -1,12 +1,10 @@
 import {sync as mkdirp} from 'mkdirp'
 import {sync as rimraf} from 'rimraf'
-import {tmpdir} from 'os'
 import fs from 'fs'
+import getConfig from 'utils/config'
 import path from 'path'
-import uuid from 'uuid'
 
-export const tempDir = path.join(tmpdir(), `ship-yard-${uuid.v4()}`)
-process.on('exit', () => rimraf(tempDir))
+export const tearDown = {}
 
 export function outputTo(filePath, data) {
   const createdDirPath = mkdirp(path.dirname(filePath))
@@ -14,6 +12,13 @@ export function outputTo(filePath, data) {
   return createdDirPath
 }
 
-export function tmp(filePath) {
-  return path.join(tempDir, filePath)
+export function tmp(filePath, configOverride) {
+  const config = configOverride || getConfig()
+
+  if (!tearDown[config.tmpDir]) {
+    process.on('exit', () => rimraf(config.tmpDir))
+    tearDown[config.tmpDir] = true
+  }
+
+  return path.join(config.tmpDir, filePath)
 }

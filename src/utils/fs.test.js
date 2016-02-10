@@ -1,5 +1,5 @@
 import {expect} from 'chai'
-import {tempDir, outputTo, tmp} from './fs'
+import {outputTo, tearDown, tmp} from './fs'
 import fs from 'fs'
 
 describe('utils/fs', () => {
@@ -37,8 +37,15 @@ describe('utils/fs', () => {
   describe('tmp', () => {
 
     it('prefixes the given path with the tempDir', () => {
-      const result = tmp('/path/to/test/file.js')
-      expect(result).to.equal(`${tempDir}/path/to/test/file.js`)
+      const config = {tmpDir: '/test'}
+      const result = tmp('/path/to/test/file.js', config)
+      expect(result).to.equal('/test/path/to/test/file.js')
+    })
+
+    it('adds the path to the teardown queue', () => {
+      const config = {tmpDir: '/test'}
+      tmp('/path/to/test/file.js', config)
+      expect(tearDown).to.have.property('/test', true)
     })
 
   })

@@ -25,25 +25,26 @@ describe('utils/config', () => {
       silent: false,
       source: 'src',
       trace: false,
+      tmpDir: 'test',
       v: true,
       verbose: true,
     }
 
     it('checks the command line for options', () => {
-      const args = ['--verbose']
+      const args = ['--verbose', '--tmpDir', 'test']
       const result = getConfig(args)
       expect(result).to.deep.equal(expected)
     })
 
     it('checks an rc file for options', () => {
-      findupStub.returns({verbose: true})
+      findupStub.returns({verbose: true, tmpDir: 'test'})
       const result = getConfig([])
-      expect(findupStub).to.have.been.calledWith('.shipyardrc')
+      expect(findupStub).to.have.been.calledWith('.shiprc')
       expect(result).to.deep.equal(expected)
     })
 
     it('sets verbose to true if trace is true', () => {
-      const args = ['--trace']
+      const args = ['--trace', '--tmpDir', 'test']
       const result = getConfig(args)
       expect(result).to.deep.equal({...expected, trace: true})
     })

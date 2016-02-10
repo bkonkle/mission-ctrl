@@ -3,6 +3,7 @@ import {initialState as workers, workerReady} from 'state/workers'
 import {logStream} from 'utils/logging'
 import {Map} from 'immutable'
 import {newStore} from 'state/store'
+import {tempDir} from 'utils/fs'
 import childProcess from 'child_process'
 import findup from 'findup-sync'
 import getConfig from 'utils/config'
@@ -12,10 +13,16 @@ import slug from 'slug'
 import through from 'through2'
 
 export function forkWorker(worker) {
+  const args = [
+    worker,
+    ...process.argv.slice(2),
+    '--color',
+    `--tmpDir ${tempDir}`,
+  ]
   const workerPath = path.resolve(
     path.join(path.dirname(__dirname), 'init.js')
   )
-  return childProcess.fork(workerPath, [worker, ...process.argv.slice(2), '--color'], {
+  return childProcess.fork(workerPath, args, {
     env: {NODE_PATH: `${process.env.NODE_PATH}:${path.dirname(__dirname)}`},
     silent: true,
   })
