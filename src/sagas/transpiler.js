@@ -2,7 +2,7 @@ import {done} from 'state/transpiler'
 import {sync as glob} from 'glob'
 import {apply, call, put, take} from 'redux-saga'
 import {TRANSPILE} from 'state/transpiler'
-import {WORKER_TRANSPILER, workerReady} from 'state/workers'
+import {WORKER_TRANSPILER, workerDone} from 'state/workers'
 import * as babel from 'utils/babel'
 import createLogger from 'utils/logging'
 import getConfig from 'utils/config'
@@ -32,5 +32,5 @@ export function* transpile() {
   log.info('—— Transpilation complete ——')
 
   yield put(done())
-  yield apply(process, process.send, [workerReady(WORKER_TRANSPILER)])
+  yield apply(process, process.send, [workerDone(WORKER_TRANSPILER)])
 }

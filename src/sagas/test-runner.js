@@ -1,7 +1,7 @@
 import {apply, call, put, take} from 'redux-saga'
 import {done, TEST} from 'state/test-runner'
 import {sync as glob} from 'glob'
-import {tempDir} from 'utils/fs'
+import {tmp} from 'utils/fs'
 import {WORKER_TEST_RUNNER, workerReady} from 'state/workers'
 import chalk from 'chalk'
 import createLogger from 'utils/logging'
@@ -11,7 +11,7 @@ import path from 'path'
 import plur from 'plur'
 
 const log = createLogger('sagas/test-runner')
-const mocha = new Mocha({reporter: 'min'})
+const mocha = new Mocha({reporter: 'dot'})
 
 export default function* initTestRunner() {
   log.debug('—— Test runner listening ——')
@@ -26,7 +26,7 @@ export default function* initTestRunner() {
 export function* runTests(configOverride, mochaOverride) {
   const config = configOverride || getConfig()
   const runner = mochaOverride || mocha
-  runner.files = yield call(glob, path.join(tempDir, config.dest, config.glob))
+  runner.files = yield call(glob, tmp(path.join(config.dest, config.glob)))
 
   yield apply(runner, runner.run, [logResults])
 

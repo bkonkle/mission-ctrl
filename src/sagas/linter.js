@@ -26,7 +26,7 @@ export function* lint() {
   const config = getConfig()
 
   const linter = yield call(getEngine)
-  const report = yield apply(linter, linter.executeOnFiles, [config.source])
+  const report = yield apply(linter, linter.executeOnFiles, [[config.source]])
   if (report && report.results) yield call(logReport, report)
 
   log.info('—— Linting complete ——')

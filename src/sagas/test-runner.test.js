@@ -1,7 +1,7 @@
 import {apply, call, put, take} from 'redux-saga'
 import {expect} from 'chai'
 import {sync as glob} from 'glob'
-import {tempDir} from 'utils/fs'
+import {tmp} from 'utils/fs'
 import {TEST, done} from 'state/test-runner'
 import {WORKER_TEST_RUNNER, workerReady} from 'state/workers'
 import chalk from 'chalk'
@@ -46,7 +46,7 @@ describe('sagas/test-runner', () => {
 
     it('gets the filenames to test from the temp directory', () => {
       const result = generator.next()
-      expect(result.value).to.deep.equal(call(glob, path.join(tempDir, 'test', '*')))
+      expect(result.value).to.deep.equal(call(glob, tmp(path.join('test', '*'))))
     })
 
     it('runs the tests', () => {

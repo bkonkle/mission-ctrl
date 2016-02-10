@@ -1,6 +1,5 @@
 import {apply, call, fork, join, put, take} from 'redux-saga'
 import {forkWorker, streams} from 'utils/workers'
-import {SET_GOAL} from 'state/foreman'
 import {DONE, READY, initialState} from 'state/workers'
 import createLogger from 'utils/logging'
 import slug from 'slug'
@@ -77,13 +76,4 @@ export function* waitForReady(workers) {
 
 export function* waitForDone(workers) {
   yield call(waitForStatus, DONE, workers)
-}
-
-export function* waitForGoal(goal) {
-  while (true) {
-    const action = yield take(SET_GOAL)
-    if (action.payload.goal === goal) {
-      return
-    }
-  }
 }

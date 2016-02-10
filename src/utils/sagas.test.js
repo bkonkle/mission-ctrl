@@ -1,12 +1,11 @@
 import {apply, call, fork, join, put, take} from 'redux-saga'
 import {expect} from 'chai'
 import {forkWorker, streams} from 'utils/workers'
-import {GOAL_LINT, GOAL_WATCH, SET_GOAL, setGoal} from 'state/foreman'
 import {DONE, READY, WORKER_LINTER, WORKER_TEST_RUNNER, WORKER_WATCHER,
         workerBusy, workerReady} from 'state/workers'
 import {TASK} from 'redux-saga/lib/utils'
 import {launchWorker, watchProcess, notifyForeman, waitForStatus,
-        waitForReady, waitForDone, waitForGoal} from './sagas'
+        waitForReady, waitForDone} from './sagas'
 import sinon from 'sinon'
 
 describe('utils/sagas', () => {
@@ -161,29 +160,6 @@ describe('utils/sagas', () => {
       const generator = waitForDone(WORKER_LINTER)
       const result = generator.next()
       expect(result.value).to.deep.equal(call(waitForStatus, DONE, WORKER_LINTER))
-    })
-
-  })
-
-  describe('waitForGoal()', () => {
-    let generator = waitForGoal(GOAL_WATCH)
-
-    it('waits for a set goal event for the given worker', () => {
-      const result = generator.next()
-      expect(result.value).to.deep.equal(take(SET_GOAL))
-    })
-
-    it('completes the saga when the event is received', () => {
-      const result = generator.next(setGoal(GOAL_WATCH))
-      expect(result.done).to.be.true
-    })
-
-    it('continues waiting if the event was for another goal', () => {
-      generator = waitForGoal(GOAL_WATCH)
-      generator.next()  // yields take(SET_GOAL)
-      const result = generator.next(setGoal(GOAL_LINT))
-
-      expect(result.value).to.deep.equal(take(SET_GOAL))
     })
 
   })
