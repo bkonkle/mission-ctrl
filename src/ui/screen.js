@@ -21,6 +21,7 @@ export default function init() {
     'Watcher': newWorker(streams.get('watcher')),
     'Transpiler': newWorker(streams.get('transpiler')),
     'Linter': newWorker(streams.get('linter')),
+    'Tests': newWorker(streams.get('test-runner')),
   })
 
   screen.append(newDashboard(menuItems))

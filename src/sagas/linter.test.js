@@ -27,7 +27,7 @@ describe('sagas/linter', () => {
 
     it('sends a worker ready message to the foreman', () => {
       const result = generator.next()
-      expect(result.value).to.deep.equal(apply(process, process.send, workerReady(WORKER_LINTER)))
+      expect(result.value).to.deep.equal(apply(process, process.send, [workerReady(WORKER_LINTER)]))
     })
 
     it('goes back to waiting for lint events', () => {

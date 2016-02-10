@@ -65,6 +65,18 @@ describe('utils/babel', () => {
       expect(args[1]).to.have.property('sourceMapTarget', 'file.test.js')
     })
 
+    it('sets the mode of the compiled files to match the source files', () => {
+      babel.transpile(options)
+
+      expect(statStub).to.have.callCount(2)
+      expect(statStub).to.have.been.calledWith(filenames[0])
+      expect(statStub).to.have.been.calledWith(filenames[1])
+
+      expect(chmodSpy).to.have.callCount(4)
+      expect(chmodSpy).to.have.been.calledWith(dest, 'test')
+      expect(chmodSpy).to.have.been.calledWith(dest + '.map', 'test')
+    })
+
   })
 
 })

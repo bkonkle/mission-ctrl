@@ -55,7 +55,7 @@ describe('sagas/transpiler', () => {
 
     it('sends a workerDone event to the foreman', () => {
       const result = generator.next()
-      expect(result.value).to.deep.equal(apply(process, process.send, workerReady(WORKER_TRANSPILER)))
+      expect(result.value).to.deep.equal(apply(process, process.send, [workerReady(WORKER_TRANSPILER)]))
     })
 
     it('ends the saga', () => {

@@ -32,5 +32,5 @@ export function* transpile() {
   log.info('—— Transpilation complete ——')
 
   yield put(done())
-  yield apply(process, process.send, workerReady(WORKER_TRANSPILER))
+  yield apply(process, process.send, [workerReady(WORKER_TRANSPILER)])
 }

@@ -51,12 +51,13 @@ describe('workers/watcher', () => {
 
     it('reports the type of event and the path', () => {
       const result = generator.next()
-      expect(chalk.stripColor(result.value.CALL.args[0])).to.equal(`${event} --> ${file}`)
+      expect(result.value.CALL.fn).to.equal(info)
+      expect(result.value.CALL.args).to.deep.equal([`${chalk.yellow(event)} --> ${file}`])
     })
 
     it('sends a CHANGE event to the foreman', () => {
       const result = generator.next()
-      expect(result.value).to.deep.equal(apply(process, process.send, sourceChanged(file)))
+      expect(result.value).to.deep.equal(apply(process, process.send, [sourceChanged(file)]))
     })
 
   })

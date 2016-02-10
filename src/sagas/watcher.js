@@ -25,7 +25,7 @@ export function* watch() {
   log.info('—— Watcher started ——')
 }
 
-export function* reportChange(event, file, info = log.info.bind(log)) {
-  yield call(info, `${chalk.yellow(event)} --> ${file}`)
-  yield apply(process, process.send, sourceChanged(file))
+export function* reportChange(event, file, info = log.info) {
+  yield apply(log, info, [`${chalk.yellow(event)} --> ${file}`])
+  yield apply(process, process.send, [sourceChanged(file)])
 }

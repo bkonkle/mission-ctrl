@@ -14,6 +14,7 @@ const log = createLogger('sagas/foreman')
 export default function* startForeman() {
   yield fork(startTranspiler)
   yield fork(startLinter)
+  yield fork(startTestRunner)
   yield call(startWatcher)
   yield put(setGoal(GOAL_WATCH))
   yield fork(runLoop)
@@ -30,7 +31,7 @@ export function* startTranspiler() {
   yield call(waitForReady, WORKER_TRANSPILER)
   while (true) {
     yield call(waitForGoal, GOAL_TRANSPILE)
-    yield apply(transpiler, transpiler.send, transpile())
+    yield apply(transpiler, transpiler.send, [transpile()])
   }
 }
 
@@ -39,7 +40,7 @@ export function* startLinter() {
   yield call(waitForReady, WORKER_LINTER)
   while (true) {
     yield call(waitForGoal, GOAL_LINT)
-    yield apply(linter, linter.send, lint())
+    yield apply(linter, linter.send, [lint()])
   }
 }
 
@@ -48,7 +49,7 @@ export function* startTestRunner() {
   yield call(waitForReady, WORKER_TEST_RUNNER)
   while (true) {
     yield call(waitForGoal, GOAL_TEST)
-    yield apply(transpiler, transpiler.send, runTests())
+    yield apply(transpiler, transpiler.send, [runTests()])
   }
 }
 

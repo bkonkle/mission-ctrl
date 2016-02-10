@@ -14,7 +14,7 @@ export default function* initLinter() {
     yield take(LINT)
     yield call(lint)
     yield put(done())
-    yield apply(process, process.send, workerReady(WORKER_LINTER))
+    yield apply(process, process.send, [workerReady(WORKER_LINTER)])
   }
 }
 

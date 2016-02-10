@@ -27,6 +27,11 @@ describe('sagas/foreman', () => {
       expect(result.value).to.deep.equal(fork(foreman.startLinter))
     })
 
+    it('forks the test runner process', () => {
+      const result = generator.next()
+      expect(result.value).to.deep.equal(fork(foreman.startTestRunner))
+    })
+
     it('calls the watcher process', () => {
       const result = generator.next()
       expect(result.value).to.deep.equal(call(foreman.startWatcher))
@@ -85,7 +90,7 @@ describe('sagas/foreman', () => {
 
     it('sends TRANSPILE events to the worker', () => {
       const result = generator.next()
-      expect(result.value).to.deep.equal(apply(transpiler, transpiler.send, transpile()))
+      expect(result.value).to.deep.equal(apply(transpiler, transpiler.send, [transpile()]))
     })
 
     it('goes back to waiting for GOAL_TRANSPILE events', () => {
@@ -116,7 +121,7 @@ describe('sagas/foreman', () => {
 
     it('sends LINT events to the worker', () => {
       const result = generator.next()
-      expect(result.value).to.deep.equal(apply(linter, linter.send, lint()))
+      expect(result.value).to.deep.equal(apply(linter, linter.send, [lint()]))
     })
 
     it('goes back to waiting for GOAL_LINT events', () => {
@@ -147,7 +152,7 @@ describe('sagas/foreman', () => {
 
     it('sends TEST events to the worker', () => {
       const result = generator.next()
-      expect(result.value).to.deep.equal(apply(testRunner, testRunner.send, runTests()))
+      expect(result.value).to.deep.equal(apply(testRunner, testRunner.send, [runTests()]))
     })
 
     it('goes back to waiting for GOAL_TEST events', () => {
