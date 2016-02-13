@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-istanbul=./node_modules/.bin/istanbul
-mocha=./node_modules/.bin/_mocha
-
-NODE_PATH="$NODE_PATH:lib" \
-  NODE_ENV=test \
-  $istanbul test $mocha \
-  -- --reporter min --require utils/test-setup "lib/**/*.test.js" "$@"

@@ -10,6 +10,7 @@ import fs from 'fs'
 import initTestRunner, {clearCache, runTests, logResults} from './test-runner'
 import path from 'path'
 import reqFrom from 'req-from'
+import sinon from 'sinon'
 
 describe('sagas/test-runner', () => {
 
@@ -44,7 +45,7 @@ describe('sagas/test-runner', () => {
   })
 
   describe('runTests()', () => {
-    const mocha = {files: [], run: () => {}}
+    const mocha = {files: [], run: () => {}, addFile: sinon.spy()}
     const generator = runTests({dest: 'test', glob: '*'}, mocha)
 
     before(() => {
@@ -63,7 +64,9 @@ describe('sagas/test-runner', () => {
     })
 
     it('runs the tests', () => {
-      const result = generator.next()
+      const files = ['index.js', 'index.test.js']
+      const result = generator.next(files)
+      expect(mocha.addFile).to.have.been.calledTwice
       expect(result.value).to.deep.equal(apply(mocha, mocha.run, [logResults]))
     })
 

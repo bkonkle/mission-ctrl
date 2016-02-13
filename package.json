@@ -10,6 +10,13 @@
     "type": "git",
     "url": "git@github.com:ecliptic/ship-yard.git"
   },
+  "scripts": {
+    "build": "NODE_PATH=$NODE_PATH:src NODE_ENV=development babel src -s -d lib",
+    "build:watch": "npm run build -- -w",
+    "test": "NODE_PATH=$NODE_PATH:lib NODE_ENV=test istanbul test _mocha -- --reporter min --require utils/test-setup lib/**/*.test.js",
+    "test:watch": "npm run test -- -w",
+    "start": "parallelshell 'npm run build:watch' 'npm run test:watch'"
+  },
   "author": "Brandon Konkle <brandon@konkle.us>",
   "license": "MIT",
   "keywords": [

@@ -35,7 +35,10 @@ export function* runTests(configOverride, mochaOverride) {
     yield call(reqFrom, tmp(config.dest), './utils/test-setup')
   }
 
-  mocha.files = yield call(glob, tmp(path.join(config.dest, config.glob)))
+  const files = yield call(glob, tmp(path.join(config.dest, config.glob)))
+  files.forEach(file => {
+    mocha.addFile(file)
+  })
 
   log.debug(`Running tests in ${tmp(path.join(config.dest, config.glob))}`)
 
