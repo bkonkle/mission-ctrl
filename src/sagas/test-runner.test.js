@@ -9,7 +9,6 @@ import chalk from 'chalk'
 import fs from 'fs'
 import initTestRunner, {clearCache, runTests, logResults} from './test-runner'
 import path from 'path'
-import reqFrom from 'req-from'
 import sinon from 'sinon'
 
 describe('sagas/test-runner', () => {
@@ -53,11 +52,6 @@ describe('sagas/test-runner', () => {
       fs.writeFileSync(tmp('test/utils/test-setup.js'), '{}')
     })
 
-    it('imports the test setup if it exists', () => {
-      const result = generator.next()
-      expect(result.value).to.deep.equal(call(reqFrom, tmp('test'), './utils/test-setup'))
-    })
-
     it('gets the filenames to test from the temp directory', () => {
       const result = generator.next()
       expect(result.value).to.deep.equal(call(glob, tmp(path.join('test', '*'))))
@@ -72,47 +66,12 @@ describe('sagas/test-runner', () => {
 
     it('clears the require cache', () => {
       const result = generator.next()
-      expect(result.done).to.be.true
       expect(result.value).to.deep.equal(call(clearCache))
     })
 
-  })
-
-  describe('logResults()', () => {
-    const info = () => {}
-
-    it('logs the results of the test run and ends the saga', () => {
-      const generator = logResults(4, info)
+    it('ends the saga', () => {
       const result = generator.next()
       expect(result.done).to.be.true
-      expect(result.value).to.have.property('CALL')
-      expect(result.value.CALL.fn).to.equal(info)
-      expect(result.value.CALL.args).to.deep.equal([chalk.red('4 tests failed.')])
-    })
-
-    it('logs a positive result when there are no failures', () => {
-      const generator = logResults(0, info)
-      const result = generator.next()
-      expect(result.done).to.be.true
-      expect(result.value).to.have.property('CALL')
-      expect(result.value.CALL.fn).to.equal(info)
-      expect(result.value.CALL.args).to.deep.equal([chalk.green('All tests passed! 👍')])
-    })
-
-  })
-
-  describe('clearCache()', () => {
-
-    it('deletes all existing keys in require.cache', () => {
-      const req = {cache: {'./src/init.js': true}}
-      clearCache(req)
-      expect(req.cache).to.be.empty
-    })
-
-    it('skips compiled C/C++ extensions', () => {
-      const req = {cache: {'wicked-fast.node': true}}
-      clearCache(req)
-      expect(req.cache).to.deep.equal({'wicked-fast.node': true})
     })
 
   })

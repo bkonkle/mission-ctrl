@@ -1,8 +1,8 @@
 import {createAction, handleActions} from 'redux-actions'
 import {fromJS} from 'immutable'
 
-export const DONE = 'ship-yard/transpiler/DONE'
-export const TRANSPILE = 'ship-yard/transpiler/TRANSPILE'
+export const DONE = 'mission-ctrl/transpiler/DONE'
+export const TRANSPILE = 'mission-ctrl/transpiler/TRANSPILE'
 
 const initialState = fromJS({
   inProgress: null,

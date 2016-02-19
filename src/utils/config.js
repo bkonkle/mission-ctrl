@@ -10,7 +10,7 @@ const DEFAULTS = {
   production: false,
   silent: false,
   source: 'src',
-  tmpDir: path.join(tmpdir(), `ship-yard-${uuid.v4()}`),
+  tmpDir: path.join(tmpdir(), `mission-ctrl-${uuid.v4()}`),
   trace: false,
   verbose: false,
 }

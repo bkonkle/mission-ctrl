@@ -24,8 +24,10 @@ export function forkWorker(worker, configOverride) {
   const workerPath = path.resolve(
     path.join(path.dirname(__dirname), 'init.js')
   )
+  const origPath = process.env.NODE_PATH ? process.env.NODE_PATH + ':' : ''
+
   return childProcess.fork(workerPath, args, {
-    env: {NODE_PATH: `${process.env.NODE_PATH}:${path.dirname(__dirname)}`},
+    env: {NODE_PATH: `${origPath}${path.dirname(__dirname)}`},
     silent: true,
   })
 }
@@ -40,7 +42,7 @@ export const workerInit = (workerKey, saga, storeOverride) => {
 
   const nodeModules = findup('node_modules', {cwd: path.resolve(config.source)})
   if (nodeModules) {
-    process.env.NODE_PATH = `${process.env.NODE_PATH}:${nodeModules}`
+    process.env.NODE_PATH = `${nodeModules}:${process.env.NODE_PATH}`
     Module._initPaths()
   }
 

@@ -1,16 +1,16 @@
-# ship-yard
+# mission-ctrl
 
-A multi-process build and execution environment for React/Redux apps
+A multi-process build and execution environment for React/Redux apps.
 
 ## Plan
 
 ### Development
 
-![ship-yard-dev]
+![mission-ctrl-dev]
 
 ### Production
 
-![ship-yard-prod]
+![mission-ctrl-prod]
 
-[ship-yard-dev]: ./docs/ship-yard-dev.png
-[ship-yard-prod]: ./docs/ship-yard-prod.png
+[mission-ctrl-dev]: ./docs/mission-ctrl-dev.png
+[mission-ctrl-prod]: ./docs/mission-ctrl-prod.png

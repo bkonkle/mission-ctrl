@@ -1,16 +1,12 @@
 import {apply, call, put, take} from 'redux-saga'
 import {done, TEST} from 'state/test-runner'
-import {sync as glob} from 'glob'
+import {execSync} from 'child_process'
 import {tmp} from 'utils/fs'
 import {WORKER_TEST_RUNNER, workerReady} from 'state/workers'
-import chalk from 'chalk'
 import createLogger from 'utils/logging'
 import fs from 'fs'
 import getConfig from 'utils/config'
-import Mocha from 'mocha'
 import path from 'path'
-import plur from 'plur'
-import reqFrom from 'req-from'
 
 const log = createLogger('sagas/test-runner')
 
@@ -24,40 +20,30 @@ export default function* initTestRunner() {
   }
 }
 
-export function* runTests(configOverride, mochaOverride) {
+export function* runTests(configOverride) {
   const config = configOverride || getConfig()
-  const mocha = mochaOverride || new Mocha({
-    reporter: 'dot',
-    useColors: true,
-  })
+  const dest = tmp(config.dest)
+  const mocha = path.join(path.dirname(require.resolve('mocha')), 'bin', 'mocha')
+  let options = '--reporter dot'
 
-  if (fs.existsSync(path.join(tmp(config.dest), 'utils', 'test-setup.js'))) {
-    yield call(reqFrom, tmp(config.dest), './utils/test-setup')
+  const testSetup = path.join(dest, 'utils', 'test-setup.js')
+  if (fs.existsSync(testSetup)) {
+    options += ` --require utils/test-setup`
   }
 
-  const files = yield call(glob, tmp(path.join(config.dest, config.glob)))
-  files.forEach(file => {
-    mocha.addFile(file)
-  })
+  log.debug(`Running tests in ${dest}`)
 
-  log.debug(`Running tests in ${tmp(path.join(config.dest, config.glob))}`)
-
-  yield apply(mocha, mocha.run, [logResults])
+  try {
+    execSync(`${mocha} ${options} '**/*.test.js'`, {
+      cwd: dest,
+      env: {
+        NODE_PATH: `${process.env.NODE_PATH}:${dest}`,
+      },
+      stdio: 'inherit',
+    })
+  } catch (e) {
+    log.error(e)
+  }
 
   log.info('—— Test runner complete ——')
-  return call(clearCache)
-}
-
-export function* logResults(errCount, info = log.info) {
-  if (errCount > 0) {
-    return apply(log, info, [chalk.red(`${errCount} ${plur('test', errCount)} failed.`)])
-  }
-  return apply(log, info, [chalk.green('All tests passed! 👍')])
-}
-
-export function clearCache(requireOverride) {
-  const req = requireOverride || require
-  for (const key in req.cache) {
-    if (!/\.node$/.test(key)) delete req.cache[key]
-  }
 }

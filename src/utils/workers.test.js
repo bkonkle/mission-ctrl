@@ -37,7 +37,7 @@ describe('utils/workers', () => {
     it('calls child_process.fork on the requested worker', () => {
       const worker = {}
       const workerId = WORKER_WATCHER
-      const config = {tmpDir: '/tmp/ship-yard-test'}
+      const config = {tmpDir: '/tmp/mission-ctrl-test'}
       const args = [
         workerId,
         ...process.argv.slice(2),
@@ -64,7 +64,7 @@ describe('utils/workers', () => {
       const saga = function* mockSaga() {}
       const dispatch = sinon.spy()
       const store = {dispatch}
-      const message = {type: 'ship-yard/utils/TEST'}
+      const message = {type: 'mission-ctrl/utils/TEST'}
 
       workers.workerInit(WORKER_TRANSPILER, saga, store)
 
