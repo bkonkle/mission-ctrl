@@ -1,4 +1,4 @@
-# mission-ctrl
+# [DEPRECATED] mission-ctrl
 
 A multi-process build and execution environment for React/Redux apps.
 
